@@ -41,7 +41,7 @@
 
           <li id="step-auto">
             <b>Turn on auto logging</b>
-            <span>In Shortcuts tap <b style="display:inline">+</b>, then <b style="display:inline">Wallet</b>. Select all cards, choose <b style="display:inline">Run Immediately</b>, tap <b style="display:inline">Next</b>, pick <b style="display:inline">TeenLedger</b>. Come back here.</span>
+            <span>In Shortcuts tap <b style="display:inline">+</b>, then <b style="display:inline">Wallet</b>. Select all cards, choose <b style="display:inline">Run Immediately</b>, tap <b style="display:inline">Next</b>, pick <b style="display:inline">TeenLedger Auto</b>. Come back here.</span>
             <div class="mt-1"><a class="btn btn-primary btn-block" href="shortcuts://">2. Turn on auto logging</a></div>
           </li>
 
@@ -115,7 +115,7 @@
         $('test-text').textContent = 'In the automation, tap the play button at the bottom to send a test, or pay for anything with Apple Pay. The status above turns green when it works.';
       }
       // Runs the TeenLedger Shortcut once with no purchase (a connection test), then returns to this page.
-      $('test-btn').href = 'shortcuts://x-callback-url/run-shortcut?name=TeenLedger&x-success=' + encodeURIComponent(location.origin + '/welcome?t=' + token);
+      $('test-btn').href = 'shortcuts://x-callback-url/run-shortcut?name=' + encodeURIComponent('TeenLedger Auto') + '&x-success=' + encodeURIComponent(location.origin + '/welcome?t=' + token);
       setChip(d.connected);
       if (!d.connected) poll();
     });
