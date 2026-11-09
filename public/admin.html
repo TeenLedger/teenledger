@@ -53,7 +53,7 @@
           <div class="field" style="margin:0"><label>Territory</label><input id="r-terr" type="text" placeholder="10th grade"></div>
           <button class="btn btn-primary" type="submit">Add</button>
         </form>
-        <div class="scroll-x mt-2"><table><thead><tr><th>Rep</th><th>Territory</th><th>Link</th><th>Paying (trial)</th><th>Earns / mo</th><th></th></tr></thead><tbody id="reps"></tbody></table></div>
+        <div class="scroll-x mt-2"><table><thead><tr><th>Rep</th><th>Territory</th><th>Links</th><th>Paying (trial)</th><th>Earns / mo</th><th></th></tr></thead><tbody id="reps"></tbody></table></div>
       </div>
 
       <div class="card mt-2">
@@ -114,7 +114,7 @@
     d.reps.forEach(function (r) {
       var tr = el('tr');
       tr.appendChild(el('td', r.name)); tr.appendChild(el('td', r.territory || ''));
-      var td = el('td'); var a = el('a', r.link.replace(/^https?:\/\//, '')); a.href = r.link; a.target = '_blank'; td.appendChild(a); tr.appendChild(td);
+      var td = el('td'); var a = el('a', 'Rep kit'); a.href = r.kit; a.target = '_blank'; td.appendChild(a); td.appendChild(document.createTextNode(' \u00b7 ')); var a2 = el('a', 'Join link'); a2.href = r.link; a2.target = '_blank'; td.appendChild(a2); tr.appendChild(td);
       tr.appendChild(el('td', r.activeCustomers + (r.trialCustomers ? ' (' + r.trialCustomers + ')' : ''))); tr.appendChild(el('td', money(r.monthlyEarnings)));
       var rm = el('td'); var b = el('button', 'Remove', 'btn btn-ghost btn-sm'); b.onclick = function () { if (confirm('Remove ' + r.name + '?')) api({ action: 'remove_rep', code: r.code }).then(load); }; rm.appendChild(b); tr.appendChild(rm);
       reps.appendChild(tr);

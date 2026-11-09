@@ -55,7 +55,7 @@ export async function start({ port = 0, live = true } = {}) {
       }
 
       // Static with clean URLs and the /u/:token rewrite
-      let rel = p === '/' ? '/index.html' : p.startsWith('/u/') ? '/me.html' : p;
+      let rel = p === '/' ? '/index.html' : p.startsWith('/u/') ? '/me.html' : p.startsWith('/join/') ? '/join.html' : p.startsWith('/rep/') ? '/rep.html' : p;
       let file = path.join(root, 'public', rel);
       if (!path.extname(file)) file += '.html';
       if (!fs.existsSync(file)) { res.writeHead(404, { 'Content-Type': TYPES['.html'] }); return res.end(fs.readFileSync(path.join(root, 'public/404.html'))); }

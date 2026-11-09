@@ -21,7 +21,7 @@
       <div class="app-head">
         <span class="pill"><span class="dot"></span><span id="mode-pill">You're in</span></span>
         <h1>Welcome, <span id="name"></span>!</h1>
-        <p class="sub">Two quick things on your iPhone and your spending logs itself. Keep this page open while you do them.</p>
+        <p class="sub">Tap the 3 buttons below in order. Takes about a minute.</p>
       </div>
 
       <div class="card mt-1">
@@ -33,42 +33,39 @@
 
       <div class="card mt-2">
         <ol class="steps">
-          <li>
-            <b>Copy your private link</b>
-            <span>This tells the Shortcut where to send your taps. Do not share it.</span>
-            <div class="copybox"><code id="ingest"></code><button class="btn btn-dark btn-sm" id="copy" type="button">Copy</button></div>
-          </li>
-
           <li id="step-shortcut">
             <b>Add the TeenLedger Shortcut</b>
-            <span>Tap the button. Your link is copied for you. When iPhone asks for your link, press and hold, tap <b style="display:inline">Paste</b>, then tap <b style="display:inline">Add Shortcut</b>.</span>
-            <div class="mt-1"><a class="btn btn-primary" id="shortcut-btn" href="#" target="_blank" rel="noopener">Add TeenLedger Shortcut</a></div>
+            <span>Tap the button, then <b style="display:inline">Set Up Shortcut</b>. Press and hold the box, tap <b style="display:inline">Paste</b>, then <b style="display:inline">Add Shortcut</b>. Come back here.</span>
+            <div class="mt-1"><a class="btn btn-primary btn-block" id="shortcut-btn" href="#">1. Add Shortcut</a></div>
           </li>
 
           <li id="step-auto">
             <b>Turn on auto logging</b>
-            <span>Open the <b style="display:inline">Shortcuts</b> app, then: Automation tab, tap <b style="display:inline">+</b>, tap <b style="display:inline">Wallet</b> ("When I tap a Wallet Card or Pass"), select all your cards, choose <b style="display:inline">Run Immediately</b>, tap Next, pick <b style="display:inline">TeenLedger</b>, tap Done.</span>
+            <span>In Shortcuts tap <b style="display:inline">+</b>, then <b style="display:inline">Wallet</b>. Select all cards, choose <b style="display:inline">Run Immediately</b>, tap <b style="display:inline">Next</b>, pick <b style="display:inline">TeenLedger</b>. Come back here.</span>
+            <div class="mt-1"><a class="btn btn-primary btn-block" href="shortcuts://">2. Turn on auto logging</a></div>
           </li>
 
           <li id="step-manual" class="hidden">
             <b>Turn on auto logging</b>
-            <span>Open the <b style="display:inline">Shortcuts</b> app and follow these steps once:</span>
+            <span>Copy your private link, open the <b style="display:inline">Shortcuts</b> app and follow these steps once:</span>
+            <div class="copybox"><code id="ingest"></code><button class="btn btn-dark btn-sm" id="copy" type="button">Copy</button></div>
             <ol class="small mt-1" style="padding-left:18px;color:var(--ink-2);font-size:14px">
-              <li>Tap <b style="display:inline">Automation</b>, then <b style="display:inline">+</b>. Scroll to <b style="display:inline">Apps</b> and tap <b style="display:inline">Wallet</b> ("When I tap a Wallet Card or Pass"). On older iPhones it is called <b style="display:inline">Transaction</b>.</li>
+              <li>Tap <b style="display:inline">Automation</b>, then <b style="display:inline">+</b>. Tap <b style="display:inline">Wallet</b> ("When I tap a Wallet Card or Pass").</li>
               <li>Select all your cards, choose <b style="display:inline">Run Immediately</b>, tap <b style="display:inline">Next</b>.</li>
               <li>Tap <b style="display:inline">New Blank Automation</b>, then <b style="display:inline">Add Action</b>.</li>
               <li>Search <b style="display:inline">Get Contents of URL</b> and tap it.</li>
               <li>Tap the blue <b style="display:inline">URL</b> and paste your link.</li>
               <li>Tap the arrow to show more. Set Method to <b style="display:inline">POST</b> and Request Body to <b style="display:inline">JSON</b>.</li>
-              <li>Add a Text field. Key: <b style="display:inline">amount</b>. Value: pick <b style="display:inline">Shortcut Input</b>, tap it, choose <b style="display:inline">Amount</b>.</li>
-              <li>Add a Text field. Key: <b style="display:inline">merchant</b>. Value: <b style="display:inline">Shortcut Input</b>, choose <b style="display:inline">Merchant</b>.</li>
+              <li>Add a Text field. Key: <b style="display:inline">amount</b>. Value: <b style="display:inline">Shortcut Input</b>, then <b style="display:inline">Amount</b>.</li>
+              <li>Add a Text field. Key: <b style="display:inline">merchant</b>. Value: <b style="display:inline">Shortcut Input</b>, then <b style="display:inline">Merchant</b>.</li>
               <li>Tap <b style="display:inline">Done</b>.</li>
             </ol>
           </li>
 
-          <li>
+          <li id="step-test">
             <b>Test it</b>
-            <span id="test-text">Open Shortcuts and tap the TeenLedger shortcut once, or pay for anything with Apple Pay. The status above turns green when it works.</span>
+            <span id="test-text">Tap the button. It runs the Shortcut once and brings you back here. The status at the top turns green.</span>
+            <div class="mt-1" id="test-wrap"><a class="btn btn-dark btn-block" id="test-btn" href="#">3. Test it</a></div>
           </li>
         </ol>
       </div>
@@ -114,8 +111,11 @@
       if (d.shortcutUrl) { $('shortcut-btn').href = d.shortcutUrl; }
       else {
         $('step-shortcut').classList.add('hidden'); $('step-auto').classList.add('hidden'); $('step-manual').classList.remove('hidden');
+        $('test-wrap').classList.add('hidden');
         $('test-text').textContent = 'In the automation, tap the play button at the bottom to send a test, or pay for anything with Apple Pay. The status above turns green when it works.';
       }
+      // Runs the TeenLedger Shortcut once with no purchase (a connection test), then returns to this page.
+      $('test-btn').href = 'shortcuts://x-callback-url/run-shortcut?name=TeenLedger&x-success=' + encodeURIComponent(location.origin + '/welcome?t=' + token);
       setChip(d.connected);
       if (!d.connected) poll();
     });
@@ -123,7 +123,7 @@
 
   function setChip(ok) {
     var c = $('chip');
-    if (ok) { c.className = 'status-chip ok'; c.innerHTML = '&#10003; Connected. You are all set!'; }
+    if (ok) { c.className = 'status-chip ok'; c.innerHTML = '&#10003; Connected. You are all set!'; $('test-text').textContent = 'Done. Every Apple Pay tap now logs by itself.'; $('test-wrap').classList.add('hidden'); }
   }
 
   function poll() {

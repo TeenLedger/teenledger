@@ -3,26 +3,57 @@
   "outputDirectory": "public",
   "cleanUrls": true,
   "functions": {
-    "api/**/*.js": { "maxDuration": 30, "excludeFiles": "{public,dev}/**" }
+    "api/**/*.js": {
+      "maxDuration": 30,
+      "excludeFiles": "{public,dev}/**"
+    }
   },
   "rewrites": [
-    { "source": "/u/:token", "destination": "/me" }
+    {
+      "source": "/u/:token",
+      "destination": "/me"
+    },
+    {
+      "source": "/join/:code",
+      "destination": "/join"
+    },
+    {
+      "source": "/rep/:code",
+      "destination": "/rep"
+    }
   ],
   "crons": [
-    { "path": "/api/cron/weekly", "schedule": "0 22 * * 0" }
+    {
+      "path": "/api/cron/weekly",
+      "schedule": "0 22 * * 0"
+    }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "X-Frame-Options", "value": "DENY" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        }
       ]
     },
     {
-      "source": "/(me|admin|welcome)",
-      "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }]
+      "source": "/(me|admin|welcome|rep)(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        }
+      ]
     }
   ]
 }

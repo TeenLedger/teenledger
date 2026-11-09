@@ -21,7 +21,7 @@ export default async function handler(req, res) {
       const name = clean(body.name, 60);
       if (!code || !name) return json(res, 400, { error: 'Rep code and name are required.' });
       await q('insert into tl_reps (code, name, territory) values ($1,$2,$3) on conflict (code) do update set name = excluded.name, territory = excluded.territory', [code, name, clean(body.territory, 40) || null]);
-      return json(res, 200, { ok: true, link: `${siteUrl}/?ref=${code}` });
+      return json(res, 200, { ok: true, link: `${siteUrl}/join/${code}`, kit: `${siteUrl}/rep/${code}` });
     }
     if (a === 'remove_rep') {
       await q('delete from tl_reps where code = $1', [String(body.code || '')]);
@@ -79,7 +79,7 @@ export default async function handler(req, res) {
   const repRows = reps.map((r) => {
     const mine = paying.filter((c) => c.ref_code === r.code);
     const trial = trialing.filter((c) => c.ref_code === r.code).length;
-    return { ...r, link: `${siteUrl}/?ref=${r.code}`, activeCustomers: mine.length, trialCustomers: trial, monthlyEarnings: mine.length * REP_PAY_PER_CUSTOMER };
+    return { ...r, link: `${siteUrl}/join/${r.code}`, kit: `${siteUrl}/rep/${r.code}`, activeCustomers: mine.length, trialCustomers: trial, monthlyEarnings: mine.length * REP_PAY_PER_CUSTOMER };
   });
   const unassigned = signedUp.filter((c) => !c.ref_code || !reps.some((r) => r.code === c.ref_code)).length;
 

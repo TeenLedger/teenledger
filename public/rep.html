@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Rep kit | TeenLedger</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#12b886">
+  <link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <style>
+    .kit { padding: 22px 0 40px; }
+    .qr { background: #fff; border-radius: 20px; padding: 14px; width: min(320px, 100%); margin: 0 auto; }
+    .qr svg { width: 100%; height: auto; display: block; }
+    .nums { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .num { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
+    .num b { display: block; font-size: 28px; }
+    .num span { color: var(--muted); font-size: 14px; font-weight: 600; }
+    .do { padding-left: 22px; margin: 10px 0 0; }
+    .do li { margin: 0 0 12px; color: var(--ink-2); }
+    .do b { color: var(--ink); }
+    .say { background: var(--mint-soft); border-radius: 14px; padding: 14px; color: var(--ink); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <main class="narrow kit">
+    <a class="brand" href="/"><img src="/assets/logo.svg" alt="">TeenLedger <span class="badge test">Rep kit</span></a>
+    <div id="err" class="card mt-2 hidden"><h3>Hmm.</h3><p id="err-msg"></p></div>
+
+    <div id="ok" class="hidden">
+      <h1 style="font-size:28px;margin:16px 0 4px">Hi <span id="name"></span></h1>
+      <p class="sub" style="font-size:16px">Show this QR. They scan it with their iPhone Camera.</p>
+
+      <div class="qr mt-2" id="qr"></div>
+      <div class="center mt-1"><button class="btn btn-ghost btn-sm" id="copy" type="button">Copy my link</button></div>
+
+      <div class="nums mt-2">
+        <div class="num"><b id="n-signups">0</b><span>Signed up</span></div>
+        <div class="num"><b id="n-paying">0</b><span>Paying</span></div>
+        <div class="num"><b id="n-trial">0</b><span>In free week</span></div>
+        <div class="num"><b id="n-earns">$0</b><span>You earn / month</span></div>
+      </div>
+      <p class="small mt-1 hidden" id="n-warn" style="color:#b77400;font-weight:600"></p>
+
+      <div class="card mt-2">
+        <h3 class="mt-0">Say this (10 seconds)</h3>
+        <p class="say">"It texts you every Sunday with where your money went. Logs every Apple Pay tap by itself. First week free, then $3 a month. I'll set it up for you in a minute."</p>
+      </div>
+
+      <div class="card mt-2">
+        <h3 class="mt-0">Set it up on THEIR phone (60 seconds)</h3>
+        <ol class="do">
+          <li>They scan the QR, type <b>first name</b> and <b>phone</b>, check the box, tap <b>Start free week</b>, then pay with <b>Apple Pay</b>.</li>
+          <li>On the setup page tap <b>1. Add Shortcut</b>. Tap <b>Set Up Shortcut</b>, press and hold the box, tap <b>Paste</b>, tap <b>Add Shortcut</b>. Go back to Safari.</li>
+          <li>Tap <b>2. Turn on auto logging</b>. In Shortcuts: <b>+</b>, <b>Wallet</b>, select all cards, <b>Run Immediately</b>, <b>Next</b>, pick <b>TeenLedger</b>. Go back to Safari.</li>
+          <li>Tap <b>3. Test it</b>. When the page says <b>Connected</b>, hand the phone back. Done.</li>
+        </ol>
+        <p class="small">Needs an iPhone with Apple Pay in Wallet. If something fails, text your Sales Lead the teen's first name.</p>
+      </div>
+    </div>
+  </main>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var code = (location.pathname.split('/')[2] || new URLSearchParams(location.search).get('code') || '').toLowerCase();
+  function fail(m) { $('err').classList.remove('hidden'); $('err-msg').textContent = m; }
+  if (!code) return fail('Open your own rep link, like teenledger.app/rep/yourname.');
+  fetch('/api/rep?code=' + encodeURIComponent(code)).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); }).then(function (x) {
+    if (!x.ok) return fail(x.j.error || 'Rep not found.');
+    var d = x.j, s = d.stats;
+    $('ok').classList.remove('hidden');
+    $('name').textContent = d.name;
+    $('qr').innerHTML = d.qrSvg;
+    $('n-signups').textContent = s.signups; $('n-paying').textContent = s.paying; $('n-trial').textContent = s.trialing; $('n-earns').textContent = '$' + s.earns;
+    if (s.notConnected) { $('n-warn').textContent = s.notConnected + ' of your signups never finished setup. Their taps are not logging, so they will likely cancel. Help them finish.'; $('n-warn').classList.remove('hidden'); }
+    $('copy').onclick = function () { (navigator.clipboard ? navigator.clipboard.writeText(d.joinLink) : Promise.reject()).then(function () { $('copy').textContent = 'Copied!'; }, function () { prompt('Your link:', d.joinLink); }); };
+  }).catch(function () { fail('Network problem. Try again.'); });
+})();
+</script>
+</body>
+</html>

@@ -45,7 +45,12 @@ async function liveMode() {
   const badAdmin = await call(B, '/api/admin', { headers: { 'x-admin-key': 'nope' } });
   ok(badAdmin.status === 401, 'Admin rejects wrong key');
   const rep = await call(B, '/api/admin', { method: 'POST', headers: admin, json: { action: 'add_rep', name: 'Maya P.', code: 'Maya', territory: '10th grade' } });
-  ok(rep.status === 200 && rep.body.link.endsWith('/?ref=maya'), 'Admin adds sales rep with referral link');
+  ok(rep.status === 200 && rep.body.link.endsWith('/join/maya') && rep.body.kit.endsWith('/rep/maya'), 'Admin adds sales rep with join link and rep kit');
+  const kit0 = await call(B, '/api/rep?code=maya');
+  ok(kit0.status === 200 && kit0.body.name === 'Maya P.' && kit0.body.qrSvg.startsWith('<svg') && kit0.body.stats.signups === 0, 'Rep kit returns name, QR code and zero stats');
+  const kitBad = await call(B, '/api/rep?code=nobody');
+  ok(kitBad.status === 404, 'Unknown rep code is rejected');
+  for (const p of ['/join/maya', '/rep/maya']) { const r = await call(B, p); ok(r.status === 200 && String(r.body).includes('TeenLedger'), `Page ${p} loads`); }
 
   const bad1 = await call(B, '/api/signup', { method: 'POST', json: { firstName: 'Sam', phone: '123', consent: true } });
   ok(bad1.status === 400, 'Signup rejects bad phone');
@@ -151,6 +156,8 @@ async function liveMode() {
   ok(a.body.stats.trialing === 2 && a.body.stats.paying === 0 && a.body.stats.mrr === 0, 'Admin shows 2 in free trial, $0 revenue yet', JSON.stringify(a.body.stats));
   const repRow = a.body.reps.find((r) => r.code === 'maya');
   ok(repRow && repRow.trialCustomers === 1 && repRow.monthlyEarnings === 0, 'Rep Maya credited 1 trial customer, pay starts after trial');
+  const kit1 = await call(B, '/api/rep?code=maya');
+  ok(kit1.body.stats.signups === 1 && kit1.body.stats.trialing === 1 && kit1.body.stats.earns === 0, 'Rep kit shows the rep their own signup', JSON.stringify(kit1.body.stats));
   ok(a.body.customers.every((c) => /^\(\*\*\*\) \*\*\*-\d{4}$/.test(c.phone)), 'Admin masks phone numbers');
   ok(a.body.messages.length > 0, 'Admin shows text log');
 

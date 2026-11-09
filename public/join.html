@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Start your free week | TeenLedger</title>
+  <meta name="theme-color" content="#12b886">
+  <link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <style>
+    .join { padding: 28px 0 40px; }
+    .join h1 { font-size: 30px; margin: 10px 0 6px; }
+    .join .big-in { font-size: 20px; padding: 16px; }
+    .join .go { font-size: 19px; padding: 18px; }
+    .rep-tag { display: inline-block; background: var(--mint-soft); color: var(--mint-2); font-weight: 700; font-size: 14px; padding: 6px 12px; border-radius: 999px; }
+  </style>
+</head>
+<body>
+  <main class="narrow join">
+    <a class="brand" href="/"><img src="/assets/logo.svg" alt="">TeenLedger</a>
+    <h1>Track your spending automatically</h1>
+    <p class="sub" style="font-size:16px">Free for 7 days, then $3 a month. Cancel anytime.</p>
+    <span class="rep-tag hidden" id="rep-tag"></span>
+
+    <form class="card form-card mt-2" id="f" novalidate>
+      <div class="error" id="err"></div>
+      <div class="field"><label for="firstName">First name</label><input class="big-in" id="firstName" type="text" autocomplete="given-name" maxlength="40" required></div>
+      <div class="field"><label for="phone">Mobile number</label><input class="big-in" id="phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="(614) 555-0123" required></div>
+      <label class="consent"><input type="checkbox" id="consent"><span>I am 13 or older and agree to get TeenLedger texts (about 1 to 3 a week). Msg and data rates may apply. Reply STOP to opt out. <a href="/terms">Terms</a> and <a href="/privacy">Privacy</a>.</span></label>
+      <button class="btn btn-primary btn-block go" id="go" type="submit">Start free week</button>
+      <p class="small center mt-1">Next screen: pay with Apple Pay. Nothing is charged for 7 days.</p>
+    </form>
+  </main>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var code = (location.pathname.split('/')[2] || new URLSearchParams(location.search).get('ref') || '').toLowerCase().replace(/[^a-z0-9_-]/g, '');
+  if (code) {
+    try { localStorage.setItem('tl_ref', code); } catch (e) {}
+    fetch('/api/rep?name=1&code=' + encodeURIComponent(code)).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      if (d && d.name) { $('rep-tag').textContent = 'Signing up with ' + d.name; $('rep-tag').classList.remove('hidden'); }
+    }).catch(function () {});
+  }
+  $('phone').addEventListener('input', function (e) {
+    var d = e.target.value.replace(/\D/g, '').replace(/^1/, '').slice(0, 10);
+    e.target.value = d.length > 6 ? '(' + d.slice(0, 3) + ') ' + d.slice(3, 6) + '-' + d.slice(6) : d.length > 3 ? '(' + d.slice(0, 3) + ') ' + d.slice(3) : d;
+  });
+  $('f').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var err = $('err'); err.style.display = 'none';
+    var p = { firstName: $('firstName').value.trim(), phone: $('phone').value, consent: $('consent').checked, plan: 'monthly', weeklyBudget: 50, ref: code };
+    var problem = !p.firstName ? 'Add your first name.' : p.phone.replace(/\D/g, '').length < 10 ? 'Enter your 10 digit mobile number.' : !p.consent ? 'Check the box to agree to texts.' : '';
+    if (problem) { err.textContent = problem; err.style.display = 'block'; return; }
+    var b = $('go'); b.disabled = true; b.textContent = 'Opening Apple Pay...';
+    fetch('/api/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(p) })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (x) { if (!x.ok || !x.j.url) throw new Error(x.j.error || 'Something went wrong. Try again.'); location.href = x.j.url; })
+      .catch(function (e2) { err.textContent = e2.message; err.style.display = 'block'; b.disabled = false; b.textContent = 'Start free week'; });
+  });
+})();
+</script>
+</body>
+</html>
