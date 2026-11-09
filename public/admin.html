@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin | TeenLedger</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <nav class="nav"><div class="wrap"><a class="brand" href="/"><img src="/assets/logo.svg" alt="">TeenLedger <span class="badge test">Admin</span></a><button class="btn btn-ghost btn-sm hidden" id="logout">Sign out</button></div></nav>
+
+  <main class="wrap" style="padding-bottom:60px">
+    <div id="login" class="card form-card">
+      <h3>Admin sign in</h3>
+      <div class="error" id="login-err"></div>
+      <div class="field"><label for="key">Admin key</label><input id="key" type="password" autocomplete="current-password"></div>
+      <button class="btn btn-primary btn-block" id="enter">Sign in</button>
+    </div>
+
+    <div id="dash" class="hidden">
+      <div class="app-head"><h1>Business dashboard</h1><p class="sub mt-0" id="cfg"></p></div>
+      <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+        <div class="stat"><div class="k">Paying customers</div><div class="v" id="st-paying">0</div></div>
+        <div class="stat"><div class="k">Monthly revenue</div><div class="v" id="st-mrr">$0</div></div>
+        <div class="stat"><div class="k">Auto logging on</div><div class="v" id="st-conn">0</div></div>
+        <div class="stat"><div class="k">Total signups</div><div class="v" id="st-signups">0</div></div>
+        <div class="stat"><div class="k">Rep payouts / mo</div><div class="v" id="st-payout">$0</div></div>
+        <div class="stat"><div class="k">Canceled</div><div class="v" id="st-canceled">0</div></div>
+      </div>
+
+      <div class="card mt-2">
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:center">
+          <h3 style="margin:0">Weekly reports</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-ghost btn-sm" id="dry">Preview all (no texts)</button>
+            <button class="btn btn-dark btn-sm" id="run">Send all now</button>
+          </div>
+        </div>
+        <p class="small mt-1">These go out automatically every Sunday at 5 PM Eastern.</p>
+        <pre id="run-out" class="hidden" style="white-space:pre-wrap;background:var(--bg);padding:14px;border-radius:12px;font-size:13px;max-height:320px;overflow:auto"></pre>
+      </div>
+
+      <div class="card mt-2">
+        <h3>Sales team</h3>
+        <p class="small">Each rep shares their own link. Every paying customer who signs up through it earns that rep $1 a month (team agreement).</p>
+        <form id="rep-form" class="row-2 mt-1" style="grid-template-columns:1fr 1fr 1fr auto;align-items:end">
+          <div class="field" style="margin:0"><label>Rep name</label><input id="r-name" type="text" placeholder="Maya P."></div>
+          <div class="field" style="margin:0"><label>Link code</label><input id="r-code" type="text" placeholder="maya"></div>
+          <div class="field" style="margin:0"><label>Territory</label><input id="r-terr" type="text" placeholder="10th grade"></div>
+          <button class="btn btn-primary" type="submit">Add</button>
+        </form>
+        <div class="scroll-x mt-2"><table><thead><tr><th>Rep</th><th>Territory</th><th>Link</th><th>Paying customers</th><th>Earns / mo</th><th></th></tr></thead><tbody id="reps"></tbody></table></div>
+      </div>
+
+      <div class="card mt-2">
+        <h3>Customers</h3>
+        <div class="scroll-x"><table><thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Status</th><th>Plan</th><th>Rep</th><th>Logging</th><th>7 day spend</th><th>Joined</th><th></th></tr></thead><tbody id="customers"></tbody></table></div>
+      </div>
+
+      <div class="card mt-2">
+        <h3>Recent texts</h3>
+        <div class="scroll-x"><table><thead><tr><th>When</th><th>To</th><th>Type</th><th>Status</th><th>Message</th></tr></thead><tbody id="msgs"></tbody></table></div>
+        <form id="sms-form" class="row-2 mt-2" style="grid-template-columns:1fr auto;align-items:end">
+          <div class="field" style="margin:0"><label>Send a test text to</label><input id="sms-to" type="tel" placeholder="(614) 555-0123"></div>
+          <button class="btn btn-ghost" type="submit">Send test</button>
+        </form>
+      </div>
+
+      <div class="card mt-2">
+        <h3>Build the shared TeenLedger Shortcut (one time, about 10 minutes)</h3>
+        <p class="small">Once this link exists, customers set up with two taps instead of nine steps. Do this on your own iPhone.</p>
+        <ol class="small mt-1" style="padding-left:18px;color:var(--ink-2);font-size:14px;line-height:1.7">
+          <li>Open Shortcuts, tap <b>+</b> to make a new shortcut, name it <b>TeenLedger</b>.</li>
+          <li>Add action <b>Text</b>. Leave it empty. This will hold the customer's private link.</li>
+          <li>Add action <b>Get Contents of URL</b>. Set URL to the <b>Text</b> variable. Method <b>POST</b>. Request Body <b>JSON</b>.</li>
+          <li>Add field <b>amount</b> = Shortcut Input, then tap it and pick <b>Amount</b>. Add field <b>merchant</b> = Shortcut Input, pick <b>Merchant</b>. Add field <b>card</b> = Shortcut Input, pick <b>Card or Pass</b>.</li>
+          <li>Run it once with the play button. It should show "TeenLedger is connected" if you pasted a real customer link into the Text action for testing. Then clear the Text action again.</li>
+          <li>Tap the <b>i</b> at the bottom, open the <b>Setup</b> tab, tap <b>Add Question</b>, pick the <b>Text</b> action, and ask: "Paste your TeenLedger link".</li>
+          <li>Tap Share, then <b>Copy iCloud Link</b>.</li>
+          <li>In Vercel, add the environment variable <b>SHORTCUT_URL</b> with that link and redeploy. The welcome page switches to the 2 tap setup automatically.</li>
+        </ol>
+      </div>
+    </div>
+  </main>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var key = null; try { key = sessionStorage.getItem('tl_admin'); } catch (e) {}
+  function money(n) { return '$' + (Math.round(n * 100) / 100).toFixed(2).replace(/\.00$/, ''); }
+  function el(tag, text, cls) { var e = document.createElement(tag); if (text !== undefined && text !== null) e.textContent = text; if (cls) e.className = cls; return e; }
+  function api(body, path) {
+    return fetch(path || '/api/admin', { method: body ? 'POST' : 'GET', headers: { 'Content-Type': 'application/json', 'x-admin-key': key }, body: body ? JSON.stringify(body) : undefined })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || ('Error ' + r.status)); return j; }); });
+  }
+  function date(d) { return d ? new Date(d).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : ''; }
+
+  function render(d) {
+    $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); $('logout').classList.remove('hidden');
+    $('cfg').textContent = 'Payments: ' + d.config.payments + '  |  Texting: ' + d.config.texting + '  |  Sunday cron: ' + (d.config.cron ? 'on' : 'off') + '  |  Shared Shortcut link: ' + (d.config.shortcutLink ? 'set' : 'not set');
+    $('st-paying').textContent = d.stats.paying + (d.stats.test ? ' (+' + d.stats.test + ' test)' : '');
+    $('st-mrr').textContent = money(d.stats.mrr);
+    $('st-conn').textContent = d.stats.connected + ' / ' + d.stats.active;
+    $('st-signups').textContent = d.stats.signups;
+    $('st-payout').textContent = money(d.stats.repPayout);
+    $('st-canceled').textContent = d.stats.canceled;
+
+    var reps = $('reps'); reps.innerHTML = '';
+    d.reps.forEach(function (r) {
+      var tr = el('tr');
+      tr.appendChild(el('td', r.name)); tr.appendChild(el('td', r.territory || ''));
+      var td = el('td'); var a = el('a', r.link.replace(/^https?:\/\//, '')); a.href = r.link; a.target = '_blank'; td.appendChild(a); tr.appendChild(td);
+      tr.appendChild(el('td', r.activeCustomers)); tr.appendChild(el('td', money(r.monthlyEarnings)));
+      var rm = el('td'); var b = el('button', 'Remove', 'btn btn-ghost btn-sm'); b.onclick = function () { if (confirm('Remove ' + r.name + '?')) api({ action: 'remove_rep', code: r.code }).then(load); }; rm.appendChild(b); tr.appendChild(rm);
+      reps.appendChild(tr);
+    });
+    if (!d.reps.length) { var tr0 = el('tr'); var td0 = el('td', 'No reps yet. Add your first Sales Lead above.'); td0.colSpan = 6; tr0.appendChild(td0); reps.appendChild(tr0); }
+
+    var cs = $('customers'); cs.innerHTML = '';
+    d.customers.forEach(function (c) {
+      var tr = el('tr');
+      tr.appendChild(el('td', c.id)); tr.appendChild(el('td', c.first_name + (c.grade ? ' (' + c.grade + ')' : ''))); tr.appendChild(el('td', c.phone));
+      var st = el('td'); st.appendChild(el('span', c.status, 'badge ' + c.status)); if (c.test) { st.appendChild(document.createTextNode(' ')); st.appendChild(el('span', 'test', 'badge test')); } tr.appendChild(st);
+      tr.appendChild(el('td', c.plan)); tr.appendChild(el('td', c.ref_code || '')); tr.appendChild(el('td', c.connected_at ? 'on' : 'not yet'));
+      tr.appendChild(el('td', money(c.week_total) + ' (' + c.week_count + ')')); tr.appendChild(el('td', date(c.created_at)));
+      var act = el('td'); act.style.whiteSpace = 'nowrap';
+      var pv = el('button', 'Preview', 'btn btn-ghost btn-sm'); pv.onclick = function () { api({ action: 'report', customerId: c.id, dryRun: true }).then(function (r) { alert(r.body); }); };
+      var sd = el('button', 'Send report', 'btn btn-dark btn-sm'); sd.style.marginLeft = '6px'; sd.onclick = function () { if (confirm('Text the weekly report to ' + c.first_name + ' now?')) api({ action: 'report', customerId: c.id }).then(function (r) { alert('Status: ' + r.status + (r.error ? '\n' + r.error : '') + '\n\n' + r.body); load(); }); };
+      act.appendChild(pv); act.appendChild(sd); tr.appendChild(act);
+      cs.appendChild(tr);
+    });
+
+    var ms = $('msgs'); ms.innerHTML = '';
+    d.messages.forEach(function (m) {
+      var tr = el('tr');
+      tr.appendChild(el('td', date(m.created_at))); tr.appendChild(el('td', (m.direction === 'in' ? 'from ' : '') + (m.first_name || ''))); tr.appendChild(el('td', m.kind));
+      var st = el('td'); st.appendChild(el('span', m.status, 'badge ' + (m.status === 'failed' ? 'failed' : m.status === 'preview' ? 'preview' : 'active'))); if (m.error) st.title = m.error; tr.appendChild(st);
+      var body = el('td', m.body); body.style.whiteSpace = 'pre-line'; body.style.maxWidth = '420px'; tr.appendChild(body);
+      ms.appendChild(tr);
+    });
+  }
+
+  function load() { api().then(render).catch(function (e) { $('login').classList.remove('hidden'); $('dash').classList.add('hidden'); var er = $('login-err'); er.textContent = e.message; er.style.display = 'block'; }); }
+
+  $('enter').onclick = function () { key = $('key').value.trim(); try { sessionStorage.setItem('tl_admin', key); } catch (e) {} load(); };
+  $('key').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('enter').click(); });
+  $('logout').onclick = function () { try { sessionStorage.removeItem('tl_admin'); } catch (e) {} location.reload(); };
+  $('rep-form').addEventListener('submit', function (e) { e.preventDefault(); api({ action: 'add_rep', name: $('r-name').value, code: $('r-code').value, territory: $('r-terr').value }).then(function () { $('r-name').value = $('r-code').value = $('r-terr').value = ''; load(); }).catch(function (er) { alert(er.message); }); });
+  $('sms-form').addEventListener('submit', function (e) { e.preventDefault(); api({ action: 'test_sms', phone: $('sms-to').value }).then(function (r) { alert('Status: ' + r.status); }).catch(function (er) { alert(er.message); }); });
+  function run(dry) {
+    var out = $('run-out'); out.classList.remove('hidden'); out.textContent = dry ? 'Building previews...' : 'Sending...';
+    fetch('/api/cron/weekly' + (dry ? '?dry=1' : ''), { headers: { 'x-admin-key': key } }).then(function (r) { return r.json(); }).then(function (j) {
+      out.textContent = (j.results || []).map(function (r) { return '#' + r.id + '  ' + (r.status || r.skipped || r.error) + (r.body ? '\n' + r.body : ''); }).join('\n\n') || 'No active customers.';
+      if (!dry) load();
+    });
+  }
+  $('dry').onclick = function () { run(true); };
+  $('run').onclick = function () { if (confirm('Send the weekly report to every active customer now?')) run(false); };
+  if (key) load();
+})();
+</script>
+</body>
+</html>

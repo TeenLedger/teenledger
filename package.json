@@ -1,0 +1,20 @@
+{
+  "name": "teenledger",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "TeenLedger: automatic Apple Pay spending tracking and a weekly money text for teens.",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "dev": "node dev/server.js",
+    "test": "node dev/e2e.js"
+  },
+  "dependencies": {
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.2.17"
+  }
+}

@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Finish setup | TeenLedger</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#12b886">
+  <link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <nav class="nav"><div class="wrap"><a class="brand" href="/"><img src="/assets/logo.svg" alt="">TeenLedger</a><a class="btn btn-ghost btn-sm hidden" id="nav-page" href="#">My money page</a></div></nav>
+
+  <main class="narrow">
+    <div id="loading" class="app-head"><h1>One second...</h1><p class="sub">Confirming your payment with Stripe.</p></div>
+    <div id="fail" class="app-head hidden"><h1>Hmm.</h1><p class="sub" id="fail-msg"></p><button class="btn btn-primary mt-2" onclick="location.reload()">Try again</button></div>
+
+    <div id="ready" class="hidden">
+      <div class="app-head">
+        <span class="pill"><span class="dot"></span><span id="mode-pill">You're in</span></span>
+        <h1>Welcome, <span id="name"></span>!</h1>
+        <p class="sub">Two quick things on your iPhone and your spending logs itself. Keep this page open while you do them.</p>
+      </div>
+
+      <div class="card mt-1">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+          <h3 class="mt-0" style="margin:0">Setup status</h3>
+          <span class="status-chip wait" id="chip"><span class="pulse"></span>Waiting for your iPhone</span>
+        </div>
+      </div>
+
+      <div class="card mt-2">
+        <ol class="steps">
+          <li>
+            <b>Copy your private link</b>
+            <span>This tells the Shortcut where to send your taps. Do not share it.</span>
+            <div class="copybox"><code id="ingest"></code><button class="btn btn-dark btn-sm" id="copy" type="button">Copy</button></div>
+          </li>
+
+          <li id="step-shortcut">
+            <b>Add the TeenLedger Shortcut</b>
+            <span>Tap the button, then tap <b style="display:inline">Add Shortcut</b>. When it asks for your link, paste it.</span>
+            <div class="mt-1"><a class="btn btn-primary" id="shortcut-btn" href="#" target="_blank" rel="noopener">Add TeenLedger Shortcut</a></div>
+          </li>
+
+          <li id="step-auto">
+            <b>Turn on auto logging</b>
+            <span>Open the <b style="display:inline">Shortcuts</b> app, then: Automation tab, tap <b style="display:inline">+</b>, tap <b style="display:inline">Transaction</b>, select all your cards, choose <b style="display:inline">Run Immediately</b>, tap Next, pick <b style="display:inline">TeenLedger</b>, tap Done.</span>
+          </li>
+
+          <li id="step-manual" class="hidden">
+            <b>Turn on auto logging</b>
+            <span>Open the <b style="display:inline">Shortcuts</b> app and follow these steps once:</span>
+            <ol class="small mt-1" style="padding-left:18px;color:var(--ink-2);font-size:14px">
+              <li>Tap <b style="display:inline">Automation</b>, then <b style="display:inline">+</b>, then <b style="display:inline">Transaction</b>.</li>
+              <li>Select all your cards, choose <b style="display:inline">Run Immediately</b>, tap <b style="display:inline">Next</b>.</li>
+              <li>Tap <b style="display:inline">New Blank Automation</b>, then <b style="display:inline">Add Action</b>.</li>
+              <li>Search <b style="display:inline">Get Contents of URL</b> and tap it.</li>
+              <li>Tap the blue <b style="display:inline">URL</b> and paste your link.</li>
+              <li>Tap the arrow to show more. Set Method to <b style="display:inline">POST</b> and Request Body to <b style="display:inline">JSON</b>.</li>
+              <li>Add a Text field. Key: <b style="display:inline">amount</b>. Value: pick <b style="display:inline">Shortcut Input</b>, tap it, choose <b style="display:inline">Amount</b>.</li>
+              <li>Add a Text field. Key: <b style="display:inline">merchant</b>. Value: <b style="display:inline">Shortcut Input</b>, choose <b style="display:inline">Merchant</b>.</li>
+              <li>Tap <b style="display:inline">Done</b>.</li>
+            </ol>
+          </li>
+
+          <li>
+            <b>Test it</b>
+            <span id="test-text">Open Shortcuts and tap the TeenLedger shortcut once, or pay for anything with Apple Pay. The status above turns green when it works.</span>
+          </li>
+        </ol>
+      </div>
+
+      <div class="card mt-2" id="done-card">
+        <h3>Your money page</h3>
+        <p>See your week by day and category, add cash buys, and change your budget. Tip: open it in Safari, tap Share, then <b>Add to Home Screen</b>.</p>
+        <a class="btn btn-dark mt-2" id="page-btn" href="#">Open my money page</a>
+      </div>
+      <p class="small center mt-2">Need help? Text HELP to TeenLedger or email <a href="mailto:support@teenledger.app">support@teenledger.app</a>.</p>
+    </div>
+  </main>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var p = new URLSearchParams(location.search);
+  var sessionId = p.get('session_id'), t = p.get('t');
+  var tries = 0, token = null;
+
+  function fail(msg) { $('loading').classList.add('hidden'); $('fail').classList.remove('hidden'); $('fail-msg').textContent = msg; }
+
+  function confirm() {
+    var url = sessionId ? '/api/confirm?session_id=' + encodeURIComponent(sessionId) : '/api/confirm?t=' + encodeURIComponent(t || '');
+    fetch(url).then(function (r) { return r.json().then(function (j) { return { s: r.status, j: j }; }); }).then(function (x) {
+      if (x.s === 402 && tries++ < 8) return setTimeout(confirm, 2000);
+      if (x.s !== 200) return fail(x.j.error || 'We could not confirm your signup.');
+      token = x.j.token;
+      try { localStorage.setItem('tl_token', token); } catch (e) {}
+      if (sessionId) history.replaceState(null, '', '/welcome?t=' + token);
+      $('name').textContent = x.j.firstName;
+      if (x.j.test) $('mode-pill').textContent = 'Test mode account (no charge)';
+      load();
+    }).catch(function () { fail('Network problem. Check your connection and try again.'); });
+  }
+
+  function load() {
+    fetch('/api/me?t=' + encodeURIComponent(token)).then(function (r) { return r.json(); }).then(function (d) {
+      $('loading').classList.add('hidden'); $('ready').classList.remove('hidden');
+      $('ingest').textContent = d.ingestUrl;
+      var page = '/u/' + token;
+      $('page-btn').href = page; $('nav-page').href = page; $('nav-page').classList.remove('hidden');
+      if (d.shortcutUrl) { $('shortcut-btn').href = d.shortcutUrl; }
+      else {
+        $('step-shortcut').classList.add('hidden'); $('step-auto').classList.add('hidden'); $('step-manual').classList.remove('hidden');
+        $('test-text').textContent = 'In the automation, tap the play button at the bottom to send a test, or pay for anything with Apple Pay. The status above turns green when it works.';
+      }
+      setChip(d.connected);
+      if (!d.connected) poll();
+    });
+  }
+
+  function setChip(ok) {
+    var c = $('chip');
+    if (ok) { c.className = 'status-chip ok'; c.innerHTML = '&#10003; Connected. You are all set!'; }
+  }
+
+  function poll() {
+    setTimeout(function () {
+      fetch('/api/me?t=' + encodeURIComponent(token)).then(function (r) { return r.json(); }).then(function (d) {
+        if (d.connected) setChip(true); else poll();
+      }).catch(poll);
+    }, 3000);
+  }
+
+  $('copy').addEventListener('click', function () {
+    var v = $('ingest').textContent;
+    (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject()).then(function () {
+      $('copy').textContent = 'Copied!'; setTimeout(function () { $('copy').textContent = 'Copy'; }, 1800);
+    }).catch(function () { prompt('Copy your link:', v); });
+  });
+
+  if (!sessionId && !t) { try { t = localStorage.getItem('tl_token'); } catch (e) {} }
+  if (!sessionId && !t) return fail('This page opens after you sign up. Start at teenledger.app.');
+  confirm();
+})();
+</script>
+</body>
+</html>
