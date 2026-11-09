@@ -30,6 +30,7 @@
         <div class="stat"><div class="k">Total signups</div><div class="v" id="st-signups">0</div></div>
         <div class="stat"><div class="k">Rep payouts / mo</div><div class="v" id="st-payout">$0</div></div>
         <div class="stat"><div class="k">Canceled</div><div class="v" id="st-canceled">0</div></div>
+        <div class="stat"><div class="k">Avg rating</div><div class="v" id="st-rating">-</div></div>
       </div>
 
       <div class="card mt-2">
@@ -71,18 +72,8 @@
       </div>
 
       <div class="card mt-2">
-        <h3>Build the shared TeenLedger Shortcut (one time, about 10 minutes)</h3>
-        <p class="small">Once this link exists, customers set up with two taps instead of nine steps. Do this on your own iPhone.</p>
-        <ol class="small mt-1" style="padding-left:18px;color:var(--ink-2);font-size:14px;line-height:1.7">
-          <li>Open Shortcuts, tap <b>+</b> to make a new shortcut, name it <b>TeenLedger</b>.</li>
-          <li>Add action <b>Text</b>. Leave it empty. This will hold the customer's private link.</li>
-          <li>Add action <b>Get Contents of URL</b>. Set URL to the <b>Text</b> variable. Method <b>POST</b>. Request Body <b>JSON</b>.</li>
-          <li>Add field <b>amount</b> = Shortcut Input, then tap it and pick <b>Amount</b>. Add field <b>merchant</b> = Shortcut Input, pick <b>Merchant</b>. Add field <b>card</b> = Shortcut Input, pick <b>Card or Pass</b>.</li>
-          <li>Run it once with the play button. It should show "TeenLedger is connected" if you pasted a real customer link into the Text action for testing. Then clear the Text action again.</li>
-          <li>Tap the <b>i</b> at the bottom, open the <b>Setup</b> tab, tap <b>Add Question</b>, pick the <b>Text</b> action, and ask: "Paste your TeenLedger link".</li>
-          <li>Tap Share, then <b>Copy iCloud Link</b>.</li>
-          <li>In Vercel, add the environment variable <b>SHORTCUT_URL</b> with that link and redeploy. The welcome page switches to the 2 tap setup automatically.</li>
-        </ol>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px"><h3 style="margin:0">Customer feedback</h3><span class="small" id="fb-sum"></span></div>
+        <div class="scroll-x mt-1"><table><thead><tr><th>When</th><th>Who</th><th>Rating</th><th>Page</th><th>Message</th></tr></thead><tbody id="fb"></tbody></table></div>
       </div>
     </div>
   </main>
@@ -134,6 +125,19 @@
       act.appendChild(pv); act.appendChild(sd); tr.appendChild(act);
       cs.appendChild(tr);
     });
+
+    var FACES = ['', '\uD83D\uDE1E', '\uD83D\uDE15', '\uD83D\uDE10', '\uD83D\uDE42', '\uD83D\uDE0D'];
+    $('st-rating').textContent = d.stats.avgRating ? d.stats.avgRating + ' / 5' : '-';
+    $('fb-sum').textContent = d.stats.feedback + ' recent';
+    var fb = $('fb'); fb.innerHTML = '';
+    (d.feedback || []).forEach(function (f) {
+      var tr = el('tr');
+      tr.appendChild(el('td', date(f.created_at))); tr.appendChild(el('td', f.first_name ? f.first_name + ' (#' + f.customer_id + ')' : 'visitor'));
+      tr.appendChild(el('td', f.rating ? FACES[f.rating] + ' ' + f.rating : '')); tr.appendChild(el('td', f.page || ''));
+      var m = el('td', f.message || ''); m.style.whiteSpace = 'pre-line'; m.style.maxWidth = '460px'; tr.appendChild(m);
+      fb.appendChild(tr);
+    });
+    if (!(d.feedback || []).length) { var tr1 = el('tr'); var td1 = el('td', 'No feedback yet.'); td1.colSpan = 5; tr1.appendChild(td1); fb.appendChild(tr1); }
 
     var ms = $('msgs'); ms.innerHTML = '';
     d.messages.forEach(function (m) {

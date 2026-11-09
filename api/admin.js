@@ -67,6 +67,8 @@ export default async function handler(req, res) {
     left join (select customer_id, count(*) n from tl_transactions group by customer_id) a on a.customer_id = c.id
     order by c.id desc limit 500`);
   const reps = await q('select * from tl_reps order by created_at');
+  const feedback = await q(`select f.id, f.rating, f.message, f.page, f.created_at, c.first_name, c.id as customer_id
+    from tl_feedback f left join tl_customers c on c.id = f.customer_id order by f.id desc limit 60`);
   const messages = await q(`select m.id, m.customer_id, c.first_name, m.direction, m.kind, m.body, m.status, m.error, m.created_at
     from tl_messages m left join tl_customers c on c.id = m.customer_id order by m.id desc limit 40`);
 
@@ -96,8 +98,11 @@ export default async function handler(req, res) {
       mrr: Math.round(mrr * 100) / 100,
       repPayout: repRows.reduce((s, r) => s + r.monthlyEarnings, 0),
       unassigned,
+      feedback: feedback.length,
+      avgRating: (() => { const r = feedback.filter((f) => f.rating); return r.length ? Math.round((r.reduce((a, f) => a + f.rating, 0) / r.length) * 10) / 10 : null; })(),
     },
     reps: repRows,
+    feedback: feedback.map((f) => ({ ...f, id: Number(f.id) })),
     customers: customers.map((c) => ({ ...c, phone: maskPhone(c.phone), week_total: Number(c.week_total), week_count: Number(c.week_count), all_count: Number(c.all_count), weekly_budget: Number(c.weekly_budget) })),
     messages,
   });

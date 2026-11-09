@@ -48,6 +48,7 @@ export default async function handler(req, res) {
 
   const fresh = await one('select * from tl_customers where id = $1', [c.id]);
   const { week, summary, tips, prevTotal, days } = await weekData(fresh);
+  const history = await q('select id, amount, merchant, category, source, occurred_at from tl_transactions where customer_id = $1 and occurred_at > now() - interval \'64 days\' order by occurred_at desc limit 800', [c.id]);
   const month = await one(`select coalesce(sum(amount),0) as s, count(*) as n from tl_transactions where customer_id = $1 and occurred_at > now() - interval '30 days'`, [c.id]);
   return json(res, 200, {
     firstName: fresh.first_name,
@@ -64,6 +65,7 @@ export default async function handler(req, res) {
     days,
     monthTotal: Number(month.s),
     monthCount: Number(month.n),
-    transactions: week.slice(0, 40).map((t) => ({ id: Number(t.id), amount: Number(t.amount), merchant: t.merchant, category: t.category, source: t.source, at: t.occurred_at })),
+    // About two months of purchases so the page can compare this week, last week, this month and last month.
+    transactions: history.map((t) => ({ id: Number(t.id), amount: Number(t.amount), merchant: t.merchant, category: t.category, source: t.source, at: t.occurred_at })),
   });
 }

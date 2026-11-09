@@ -14,29 +14,33 @@
   <link rel="stylesheet" href="/assets/styles.css">
 </head>
 <body>
-  <nav class="nav"><div class="wrap"><a class="brand" href="/"><img src="/assets/logo.svg" alt="">TeenLedger</a><span class="small" id="range"></span></div></nav>
+  <nav class="nav"><div class="wrap"><a class="brand" href="/"><img src="/assets/logo.svg" alt="">TeenLedger</a><a class="btn btn-ghost btn-sm" href="#settings">Settings</a></div></nav>
 
-  <main class="narrow" style="padding-bottom:40px">
-    <div id="msg" class="app-head hidden"><h1>Link not found</h1><p class="sub">Open the link from your TeenLedger welcome text, or sign up at teenledger.app.</p></div>
+  <main class="narrow" style="padding-bottom:90px">
+    <div id="msg" class="app-head hidden"><h1>Please log in</h1><p class="sub">This link did not work on this phone.</p><a class="btn btn-primary mt-2" href="/login">Log in</a></div>
 
     <div id="app" class="hidden">
-      <div class="app-head">
+      <div class="app-head" style="padding-bottom:14px">
         <div class="notice hidden" id="test-note">Test mode account. Payments are off, texts may show as previews.</div>
-        <div class="notice hidden" id="setup-note">Auto logging is not connected yet. <a id="setup-link" href="#">Finish setup (2 minutes)</a></div>
-        <h1>Hi <span id="name"></span></h1>
-        <p class="sub mt-0">Your last 7 days</p>
+        <div class="notice hidden" id="setup-note">Auto logging is not connected yet. <a id="setup-link" href="#">Finish setup (1 minute)</a></div>
+        <h1 style="margin-bottom:12px">Hi <span id="name"></span></h1>
+        <div class="tabs" id="tabs"><button data-p="week" class="on">This week</button><button data-p="last">Last week</button><button data-p="month">This month</button></div>
       </div>
 
-      <div class="stat-grid">
-        <div class="stat"><div class="k">Spent</div><div class="v" id="s-total">$0</div></div>
-        <div class="stat"><div class="k" id="s-left-k">Left</div><div class="v" id="s-left">$0</div></div>
-        <div class="stat"><div class="k">Buys</div><div class="v" id="s-count">0</div></div>
+      <!-- 20,000 ft view -->
+      <div class="card">
+        <div class="small" id="o-label">Spent this week</div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div class="big-num" id="o-total">$0</div><span class="delta flat" id="o-delta"></span></div>
+        <div id="budget-wrap">
+          <div class="meter" id="meter"><i id="meter-fill" style="width:0"></i></div>
+          <div class="small" id="b-text"></div>
+        </div>
+        <div class="cmp" id="cmp"></div>
       </div>
 
       <div class="card mt-2">
-        <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 class="mt-0" style="margin:0">Weekly budget</h3><span class="small" id="b-text"></span></div>
-        <div class="meter" id="meter"><i id="meter-fill" style="width:0"></i></div>
-        <div class="bars" id="bars"></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0">By day</h3><span class="small">Tap a day</span></div>
+        <div class="chart" id="chart"></div>
       </div>
 
       <div class="card mt-2" id="tips-card">
@@ -45,8 +49,18 @@
       </div>
 
       <div class="card mt-2">
-        <h3>Where it went</h3>
-        <div id="cats"><p class="small">Nothing logged yet this week.</p></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0">Where it went</h3><span class="small">Tap to see buys</span></div>
+        <div id="cats" class="mt-1"></div>
+      </div>
+
+      <div class="card mt-2">
+        <h3 style="margin:0 0 6px">Top places</h3>
+        <div id="places"></div>
+      </div>
+
+      <div class="card mt-2" id="list-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h3 style="margin:0" id="list-title">Purchases</h3><button class="chip hidden" id="clear" type="button"></button></div>
+        <div id="txs" class="mt-1"></div>
       </div>
 
       <div class="card mt-2">
@@ -58,20 +72,17 @@
         </form>
       </div>
 
-      <div class="card mt-2">
-        <h3>Recent buys</h3>
-        <div id="txs"><p class="small">No buys yet. Pay with Apple Pay and it shows up here.</p></div>
-      </div>
-
-      <div class="card mt-2">
+      <div class="card mt-2" id="settings">
         <h3>Settings</h3>
         <div class="row-2" style="align-items:end">
           <div class="field" style="margin:0"><label for="budget">Weekly budget</label><select id="budget"><option>25</option><option>40</option><option>50</option><option>75</option><option>100</option><option>150</option><option>200</option></select></div>
           <button class="btn btn-dark" id="save-budget" type="button">Save budget</button>
         </div>
-        <p class="small mt-2">Month to date: <b id="month"></b>. Plan: <span id="plan"></span>. Status: <span id="status"></span>.</p>
+        <p class="small mt-2">Plan: <span id="plan"></span>. Status: <span id="status"></span>.</p>
         <div style="display:flex;gap:10px;flex-wrap:wrap" class="mt-2">
+          <a class="btn btn-ghost btn-sm" href="/api/vcard">Save TeenLedger to contacts</a>
           <a class="btn btn-ghost btn-sm" id="setup-btn" href="#">Setup steps</a>
+          <button class="btn btn-ghost btn-sm" id="logout" type="button">Log out</button>
           <button class="btn btn-ghost btn-sm" id="cancel" type="button">Cancel subscription</button>
           <button class="btn btn-ghost btn-sm" id="delete" type="button" style="color:var(--rose)">Delete my data</button>
         </div>
@@ -82,11 +93,15 @@
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var COLORS = ['#12b886', '#3b82f6', '#ffb020', '#ef4f6b', '#8b5cf6', '#0fa3b1', '#64748b', '#f97316', '#94a3b8', '#22c55e'];
+  var COLORS = { 'Food & Drinks': '#12b886', 'Shopping': '#3b82f6', 'Games & Fun': '#8b5cf6', 'Gas & Convenience': '#ffb020', 'Getting Around': '#0fa3b1', 'Groceries': '#22c55e', 'Beauty & Care': '#ef4f6b', 'School': '#f97316', 'Cash buys': '#64748b', 'Other': '#94a3b8' };
+  var DAY = 864e5;
   var token = (location.pathname.match(/\/u\/([A-Za-z0-9_-]{10,})/) || [])[1] || new URLSearchParams(location.search).get('t');
   if (!token) { try { token = localStorage.getItem('tl_token'); } catch (e) {} }
   if (!token) return show(false);
+  window.TL_TOKEN = token;
   try { localStorage.setItem('tl_token', token); } catch (e) {}
+
+  var data = null, period = 'week', filter = null; // filter: {type:'day'|'cat'|'place', value, label}
 
   function money(n) { n = Math.round(n * 100) / 100; return '$' + (n % 1 ? n.toFixed(2) : n.toFixed(0)); }
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
@@ -96,51 +111,132 @@
     return fetch('/api/me?t=' + encodeURIComponent(token), body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : undefined)
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Error'); return j; }); });
   }
+  function sod(d) { var x = new Date(d); x.setHours(0, 0, 0, 0); return x.getTime(); }
+  function dayKey(ms) { var d = new Date(ms); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+  function sum(list) { return list.reduce(function (s, t) { return s + t.amount; }, 0); }
+  function between(list, a, b) { return list.filter(function (t) { var x = new Date(t.at).getTime(); return x >= a && x < b; }); }
+
+  // Period windows, in local time. Weeks are the last 7 days including today.
+  function windows() {
+    var today = sod(Date.now()), end = today + DAY, n = new Date();
+    var mStart = new Date(n.getFullYear(), n.getMonth(), 1).getTime();
+    var pmStart = new Date(n.getFullYear(), n.getMonth() - 1, 1).getTime();
+    var pmSame = Math.min(mStart, pmStart + (end - mStart));
+    return {
+      week: { a: end - 7 * DAY, b: end, ca: end - 14 * DAY, cb: end - 7 * DAY, label: 'Spent this week', vs: 'vs last week' },
+      last: { a: end - 14 * DAY, b: end - 7 * DAY, ca: end - 21 * DAY, cb: end - 14 * DAY, label: 'Spent last week', vs: 'vs the week before' },
+      month: { a: mStart, b: end, ca: pmStart, cb: pmSame, label: 'Spent this month', vs: 'vs same days last month' },
+    };
+  }
 
   function render(d) {
-    show(true);
+    data = d; show(true);
     $('name').textContent = d.firstName;
     $('test-note').classList.toggle('hidden', !d.test);
     $('setup-note').classList.toggle('hidden', d.connected);
     $('setup-link').href = '/welcome?t=' + token; $('setup-btn').href = '/welcome?t=' + token;
-    var s = d.summary;
-    $('s-total').textContent = money(s.total);
-    $('s-count').textContent = s.count;
-    var over = s.total > s.budget;
-    $('s-left-k').textContent = over ? 'Over budget' : 'Left';
-    $('s-left').textContent = money(Math.abs(s.budget - s.total));
-    $('s-left').style.color = over ? 'var(--rose)' : 'var(--mint-2)';
-    $('b-text').textContent = s.pctOfBudget + '% of ' + money(s.budget);
-    $('meter').className = 'meter' + (over ? ' over' : '');
-    setTimeout(function () { $('meter-fill').style.width = Math.min(100, s.pctOfBudget) + '%'; }, 50);
+    $('budget').value = String(d.weeklyBudget);
+    if ($('budget').value !== String(d.weeklyBudget)) { $('budget').appendChild(el('option', '', String(d.weeklyBudget))); $('budget').value = String(d.weeklyBudget); }
+    $('plan').textContent = d.plan === 'yearly' ? '$30 / year' : '$3 / month';
+    $('status').textContent = d.status;
+    draw();
+  }
 
-    var bars = $('bars'); bars.innerHTML = '';
-    var max = Math.max.apply(null, d.days.map(function (x) { return x.total; }).concat([1]));
-    d.days.forEach(function (day) {
-      var b = el('div', 'b'); var i = el('i'); i.style.height = Math.max(4, (day.total / max) * 96) + 'px'; i.title = money(day.total);
-      b.appendChild(i); b.appendChild(el('span', '', day.label)); bars.appendChild(b);
+  function draw() {
+    var w = windows()[period], all = data.transactions;
+    var cur = between(all, w.a, w.b), prev = between(all, w.ca, w.cb);
+    var total = sum(cur), ptotal = sum(prev);
+
+    // Overview
+    $('o-label').textContent = w.label;
+    $('o-total').textContent = money(total);
+    var diff = Math.round((total - ptotal) * 100) / 100, dl = $('o-delta');
+    if (!ptotal && !total) { dl.className = 'delta flat'; dl.textContent = 'No buys yet'; }
+    else if (Math.abs(diff) < 0.5) { dl.className = 'delta flat'; dl.textContent = 'Same ' + w.vs; }
+    else { dl.className = 'delta ' + (diff > 0 ? 'up' : 'down'); dl.textContent = (diff > 0 ? '▲ ' : '▼ ') + money(Math.abs(diff)) + ' ' + w.vs; }
+
+    var showBudget = period !== 'month', budget = data.weeklyBudget;
+    $('budget-wrap').classList.toggle('hidden', !showBudget);
+    if (showBudget) {
+      var pct = budget ? Math.round((total / budget) * 100) : 0, over = total > budget;
+      $('meter').className = 'meter' + (over ? ' over' : '');
+      setTimeout(function () { $('meter-fill').style.width = Math.min(100, pct) + '%'; }, 30);
+      $('b-text').textContent = over ? money(total - budget) + ' over your ' + money(budget) + ' budget' : money(budget - total) + ' left of your ' + money(budget) + ' budget';
+    }
+    var days = Math.max(1, Math.round((Math.min(w.b, sod(Date.now()) + DAY) - w.a) / DAY));
+    var W = windows(), cmp = $('cmp'); cmp.innerHTML = '';
+    var cells = period === 'month'
+      ? [[money(ptotal), 'Last month, same days'], [money(sum(between(all, W.week.a, W.week.b))), 'This week'], [money(total / days), 'Per day']]
+      : [[money(ptotal), period === 'week' ? 'Last week' : 'Week before'], [String(cur.length), 'Buys'], [money(total / 7), 'Per day']];
+    cells.forEach(function (c) { var d = el('div'); d.appendChild(el('b', '', c[0])); d.appendChild(el('span', '', c[1])); cmp.appendChild(d); });
+
+    // Chart by day
+    var chart = $('chart'); chart.innerHTML = '';
+    var buckets = [];
+    for (var t = sod(w.a); t < w.b; t += DAY) buckets.push(t);
+    var totals = buckets.map(function (b) { return sum(between(cur, b, b + DAY)); });
+    var max = Math.max.apply(null, totals.concat([1]));
+    chart.classList.toggle('has-sel', !!(filter && filter.type === 'day'));
+    buckets.forEach(function (b, i) {
+      var col = el('div', 'col' + (totals[i] ? '' : ' empty') + (filter && filter.type === 'day' && filter.value === b ? ' sel' : ''));
+      var bar = el('i'); bar.style.height = Math.max(3, (totals[i] / max) * 120) + 'px';
+      var d = new Date(b);
+      var lab = buckets.length <= 7 ? d.toLocaleDateString('en-US', { weekday: 'short' }) : (d.getDate() === 1 || d.getDate() % 5 === 0 ? String(d.getDate()) : '');
+      col.title = d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }) + ': ' + money(totals[i]);
+      col.appendChild(bar); col.appendChild(el('span', '', lab));
+      col.onclick = function () { setFilter(filter && filter.type === 'day' && filter.value === b ? null : { type: 'day', value: b, label: d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) }); };
+      chart.appendChild(col);
     });
+    chart.style.gap = buckets.length > 7 ? '2px' : '8px';
 
+    // Tips only describe the current week.
     var tips = $('tips'); tips.innerHTML = '';
-    (d.tips || []).slice(0, 3).forEach(function (t) { var row = el('div', 'tip'); row.appendChild(el('b', '', '→')); row.appendChild(el('span', '', t.text)); tips.appendChild(row); });
-    $('tips-card').classList.toggle('hidden', !d.tips || !d.tips.length);
+    (data.tips || []).slice(0, 3).forEach(function (tp) { var row = el('div', 'tip'); row.appendChild(el('b', '', '→')); row.appendChild(el('span', '', tp.text)); tips.appendChild(row); });
+    $('tips-card').classList.toggle('hidden', period !== 'week' || !data.tips || !data.tips.length);
 
-    var cats = $('cats'); cats.innerHTML = '';
-    if (!s.byCategory.length) cats.appendChild(el('p', 'small', 'Nothing logged yet this week.'));
-    s.byCategory.forEach(function (c, idx) {
-      var row = el('div', 'cat-row');
-      row.appendChild(el('span', '', c.category));
-      row.appendChild(el('b', '', money(c.total) + '  ·  ' + c.pct + '%'));
-      var bar = el('div', 'bar'); var i = el('i'); i.style.width = c.pct + '%'; i.style.background = COLORS[idx % COLORS.length]; bar.appendChild(i); row.appendChild(bar);
-      cats.appendChild(row);
+    // Categories with change vs comparison period
+    var cats = group(cur, 'category'), pcats = group(prev, 'category');
+    var box = $('cats'); box.innerHTML = '';
+    if (!cats.length) box.appendChild(el('p', 'small', 'Nothing logged in this period.'));
+    cats.forEach(function (c) {
+      var row = el('div', 'row-tap' + (filter && filter.type === 'cat' && filter.value === c.key ? ' sel' : ''));
+      var left = el('div'); left.appendChild(el('b', '', c.key)); left.appendChild(el('small', '', '  ' + c.count + ' buy' + (c.count === 1 ? '' : 's')));
+      var before = (pcats.find(function (p) { return p.key === c.key; }) || { total: 0 }).total, ch = c.total - before;
+      var right = el('div'); right.style.textAlign = 'right';
+      right.appendChild(el('b', '', money(c.total)));
+      right.appendChild(el('div', 'small', Math.abs(ch) < 0.5 ? 'same as before' : (ch > 0 ? '▲ ' : '▼ ') + money(Math.abs(ch))));
+      var bar = el('div', 'bar'), i = el('i'); i.style.width = Math.round((c.total / total) * 100) + '%'; i.style.background = COLORS[c.key] || '#94a3b8'; bar.appendChild(i);
+      row.appendChild(left); row.appendChild(right); row.appendChild(bar);
+      row.onclick = function () { setFilter(filter && filter.type === 'cat' && filter.value === c.key ? null : { type: 'cat', value: c.key, label: c.key }); };
+      box.appendChild(row);
     });
 
+    // Top places
+    var places = group(cur, 'merchant').slice(0, 5), pl = $('places'); pl.innerHTML = '';
+    if (!places.length) pl.appendChild(el('p', 'small', 'Nothing logged in this period.'));
+    places.forEach(function (p) {
+      var row = el('div', 'row-tap' + (filter && filter.type === 'place' && filter.value === p.key ? ' sel' : ''));
+      var left = el('div'); left.appendChild(el('b', '', p.key)); left.appendChild(el('small', '', '  ' + p.count + 'x'));
+      row.appendChild(left); row.appendChild(el('b', '', money(p.total)));
+      row.onclick = function () { setFilter(filter && filter.type === 'place' && filter.value === p.key ? null : { type: 'place', value: p.key, label: p.key }); };
+      pl.appendChild(row);
+    });
+
+    // Purchase list, filtered by whatever was tapped
+    var list = cur.filter(function (t) {
+      if (!filter) return true;
+      if (filter.type === 'day') { var x = new Date(t.at).getTime(); return x >= filter.value && x < filter.value + DAY; }
+      if (filter.type === 'cat') return t.category === filter.value;
+      return t.merchant === filter.value;
+    });
+    $('list-title').textContent = filter ? filter.label + ': ' + money(sum(list)) : 'Purchases';
+    $('clear').classList.toggle('hidden', !filter); $('clear').textContent = '✕ Show all';
     var txs = $('txs'); txs.innerHTML = '';
-    if (!d.transactions.length) txs.appendChild(el('p', 'small', 'No buys yet. Pay with Apple Pay and it shows up here.'));
-    d.transactions.forEach(function (t) {
+    if (!list.length) txs.appendChild(el('p', 'small', data.connected ? 'No buys here yet.' : 'No buys yet. Finish setup and your Apple Pay taps show up here.'));
+    list.slice(0, 150).forEach(function (t) {
       var row = el('div', 'tx');
       var left = el('div'); left.appendChild(el('div', 'm', t.merchant));
-      var when = new Date(t.at).toLocaleString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+      var when = new Date(t.at).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
       left.appendChild(el('div', 'c', t.category + ' · ' + when + (t.source === 'cash' ? ' · cash' : '')));
       var right = el('div'); right.style.display = 'flex'; right.style.alignItems = 'center';
       right.appendChild(el('span', 'amt', money(t.amount)));
@@ -149,21 +245,28 @@
       right.appendChild(x);
       row.appendChild(left); row.appendChild(right); txs.appendChild(row);
     });
-
-    $('budget').value = String(d.weeklyBudget);
-    if ($('budget').value !== String(d.weeklyBudget)) { var o = el('option', '', String(d.weeklyBudget)); $('budget').appendChild(o); $('budget').value = String(d.weeklyBudget); }
-    $('month').textContent = money(d.monthTotal) + ' on ' + d.monthCount + ' buys';
-    $('plan').textContent = d.plan === 'yearly' ? '$30 / year' : '$3 / month';
-    $('status').textContent = d.status;
-    var start = new Date(Date.now() - 6 * 864e5), end = new Date();
-    $('range').textContent = start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' to ' + end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 
+  function group(list, field) {
+    var m = {};
+    list.forEach(function (t) { var k = t[field] || 'Other'; m[k] = m[k] || { key: k, total: 0, count: 0 }; m[k].total += t.amount; m[k].count += 1; });
+    return Object.keys(m).map(function (k) { return m[k]; }).sort(function (a, b) { return b.total - a.total; });
+  }
+  function setFilter(f) {
+    filter = f; draw();
+    if (f) $('list-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  document.querySelectorAll('#tabs button').forEach(function (b) {
+    b.onclick = function () { period = b.getAttribute('data-p'); filter = null; document.querySelectorAll('#tabs button').forEach(function (x) { x.classList.toggle('on', x === b); }); draw(); };
+  });
+  $('clear').onclick = function () { setFilter(null); };
   $('cash').addEventListener('submit', function (e) {
     e.preventDefault();
     api({ action: 'cash', amount: $('c-amt').value, merchant: $('c-what').value }).then(function (d) { $('c-amt').value = ''; $('c-what').value = ''; render(d); toast('Added'); }).catch(function (er) { toast(er.message); });
   });
   $('save-budget').addEventListener('click', function () { api({ action: 'budget', weeklyBudget: $('budget').value }).then(function (d) { render(d); toast('Budget saved'); }); });
+  $('logout').addEventListener('click', function () { try { localStorage.removeItem('tl_token'); } catch (e) {} location.href = '/login'; });
   $('cancel').addEventListener('click', function () {
     if (!confirm('Cancel your TeenLedger subscription? You will not be charged again.')) return;
     api({ action: 'cancel' }).then(function () { toast('Subscription canceled'); setTimeout(function () { location.reload(); }, 900); }).catch(function (er) { toast(er.message); });
@@ -173,8 +276,9 @@
     api({ action: 'delete_account' }).then(function () { try { localStorage.removeItem('tl_token'); } catch (e) {} location.href = '/'; });
   });
 
-  api().then(render).catch(function () { show(false); });
+  api().then(render).catch(function () { try { localStorage.removeItem('tl_token'); } catch (e) {} show(false); });
 })();
 </script>
+<script src="/assets/feedback.js" data-page="money"></script>
 </body>
 </html>

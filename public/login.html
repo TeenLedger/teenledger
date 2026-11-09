@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Log in | TeenLedger</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#12b886">
+  <link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <style>.login { padding: 28px 0 40px; } .login h1 { font-size: 30px; margin: 14px 0 6px; } .big-in { font-size: 20px !important; padding: 16px !important; } .code-in { letter-spacing: 0.4em; text-align: center; font-weight: 800; }</style>
+</head>
+<body>
+  <main class="narrow login">
+    <a class="brand" href="/"><img src="/assets/logo.svg" alt="">TeenLedger</a>
+
+    <div id="known" class="card form-card hidden" style="margin-top:22px">
+      <h3 style="margin:0">Welcome back, <span id="known-name"></span></h3>
+      <a class="btn btn-primary btn-block mt-2" id="known-go" href="#" style="font-size:18px;padding:16px">Open my money page</a>
+      <button class="btn btn-ghost btn-block mt-1" id="not-me" type="button">Use a different number</button>
+    </div>
+
+    <div id="form-wrap">
+      <h1>Log in</h1>
+      <p class="sub" style="font-size:16px">We text you a 6 digit code. No password.</p>
+      <form class="card form-card" id="f" novalidate style="margin-top:14px">
+        <div class="error" id="err"></div>
+        <div id="phone-step">
+          <div class="field"><label for="phone">Mobile number</label><input class="big-in" id="phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="(614) 555-0123"></div>
+          <button class="btn btn-primary btn-block" id="send" type="submit" style="font-size:18px;padding:16px">Text me a code</button>
+        </div>
+        <div id="code-step" class="hidden">
+          <div class="field"><label for="code">Code from your text</label><input class="big-in code-in" id="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="------"></div>
+          <button class="btn btn-primary btn-block" id="verify" type="submit" style="font-size:18px;padding:16px">Log in</button>
+          <button class="btn btn-ghost btn-block mt-1" id="resend" type="button">Text me a new code</button>
+        </div>
+      </form>
+      <p class="small center mt-2">New here? <a href="/join">Start your free week</a></p>
+    </div>
+  </main>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var step = 'phone';
+  function err(m) { $('err').textContent = m; $('err').style.display = m ? 'block' : 'none'; }
+  function go(t) { try { localStorage.setItem('tl_token', t); } catch (e) {} location.href = '/u/' + t; }
+  function post(body) {
+    return fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Something went wrong.'); return j; }); });
+  }
+
+  // Already logged in on this phone: one tap.
+  var saved = null; try { saved = localStorage.getItem('tl_token'); } catch (e) {}
+  if (saved) {
+    fetch('/api/me?t=' + encodeURIComponent(saved)).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      if (!d) return;
+      $('known-name').textContent = d.firstName; $('known-go').href = '/u/' + saved;
+      $('known').classList.remove('hidden'); $('form-wrap').classList.add('hidden');
+    }).catch(function () {});
+  }
+  $('not-me').onclick = function () { try { localStorage.removeItem('tl_token'); } catch (e) {} $('known').classList.add('hidden'); $('form-wrap').classList.remove('hidden'); };
+
+  $('phone').addEventListener('input', function (e) {
+    var d = e.target.value.replace(/\D/g, '').replace(/^1/, '').slice(0, 10);
+    e.target.value = d.length > 6 ? '(' + d.slice(0, 3) + ') ' + d.slice(3, 6) + '-' + d.slice(6) : d.length > 3 ? '(' + d.slice(0, 3) + ') ' + d.slice(3) : d;
+  });
+
+  function send() {
+    err('');
+    var b = $('send'); b.disabled = true; b.textContent = 'Texting you...';
+    return post({ action: 'send', phone: $('phone').value }).then(function () {
+      step = 'code'; $('phone-step').classList.add('hidden'); $('code-step').classList.remove('hidden'); $('code').focus();
+    }).catch(function (e) { err(e.message); }).then(function () { b.disabled = false; b.textContent = 'Text me a code'; });
+  }
+  function verify() {
+    err('');
+    var b = $('verify'); b.disabled = true; b.textContent = 'Checking...';
+    post({ action: 'verify', phone: $('phone').value, code: $('code').value }).then(function (j) { go(j.token); })
+      .catch(function (e) { err(e.message); b.disabled = false; b.textContent = 'Log in'; });
+  }
+  $('f').addEventListener('submit', function (e) { e.preventDefault(); step === 'phone' ? send() : verify(); });
+  $('code').addEventListener('input', function () { this.value = this.value.replace(/\D/g, '').slice(0, 6); if (this.value.length === 6) verify(); });
+  $('resend').onclick = function () { post({ action: 'send', phone: $('phone').value }).then(function () { err(''); $('resend').textContent = 'New code sent'; }).catch(function (e) { err(e.message); }); };
+})();
+</script>
+</body>
+</html>

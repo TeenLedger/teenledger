@@ -47,7 +47,7 @@
       ]
     },
     {
-      "source": "/(me|admin|welcome|rep)(.*)",
+      "source": "/(me|admin|welcome|rep|login)(.*)",
       "headers": [
         {
           "key": "X-Robots-Tag",

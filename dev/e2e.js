@@ -35,7 +35,8 @@ async function liveMode() {
 
   const home = await call(B, '/');
   ok(home.status === 200 && String(home.body).includes('Know where your money goes'), 'Landing page loads');
-  for (const p of ['/welcome', '/privacy', '/terms', '/admin', '/u/abcdefghijklmnop']) {
+  ok(String(home.body).includes('href="/login"'), 'Landing page has a Log in button');
+  for (const p of ['/welcome', '/privacy', '/terms', '/admin', '/login', '/u/abcdefghijklmnop']) {
     const r = await call(B, p);
     ok(r.status === 200, `Page ${p} loads`);
   }
@@ -83,6 +84,39 @@ async function liveMode() {
   ok(ping.status === 200 && String(ping.body).includes('connected'), 'Shortcut test run marks account connected', ping.body);
   me = await call(B, '/api/me?t=' + token);
   ok(me.body.connected === true, 'Setup page sees connected status');
+  await call(B, '/api/tx?t=' + token, { method: 'POST', json: {} });
+  const connectedTexts = s.mock.sms.filter((m) => m.Body.includes("You're connected"));
+  ok(connectedTexts.length === 1, 'Exactly one "you are connected" text, even if setup runs twice', String(connectedTexts.length));
+  ok(connectedTexts[0] && connectedTexts[0].MediaUrl === B + '/api/vcard', 'Connected text attaches the TeenLedger contact card', JSON.stringify(connectedTexts[0] || {}));
+  ok(connectedTexts[0] && connectedTexts[0].Body.includes('TeenLedger Sunday check, Sam:') && connectedTexts[0].Body.includes('/u/' + token), 'Connected text includes a sample Sunday report', (connectedTexts[0] || {}).Body);
+  const vc = await call(B, '/api/vcard');
+  ok(vc.status === 200 && vc.headers.get('content-type').includes('text/vcard') && String(vc.body).includes('FN:TeenLedger') && String(vc.body).includes('+16145550100'), 'Contact card has the TeenLedger name and number');
+
+  // Login by texted code
+  const lUnknown = await call(B, '/api/login', { method: 'POST', json: { action: 'send', phone: '6145559999' } });
+  ok(lUnknown.status === 404, 'Login: unknown number is told to sign up');
+  const lSend = await call(B, '/api/login', { method: 'POST', json: { action: 'send', phone: '(614) 555-0123' } });
+  const codeMsg = s.mock.sms.filter((m) => m.Body.includes('login code')).pop();
+  const code = codeMsg && codeMsg.Body.slice(0, 6);
+  ok(lSend.status === 200 && /^\d{6}$/.test(code || '') && codeMsg.Body.includes('@teenledger.app #' + code), 'Login: 6 digit code texted with iPhone autofill line', codeMsg && codeMsg.Body);
+  const lAgain = await call(B, '/api/login', { method: 'POST', json: { action: 'send', phone: '6145550123' } });
+  ok(lAgain.status === 429, 'Login: resend is rate limited for 30 seconds');
+  const lBad = await call(B, '/api/login', { method: 'POST', json: { action: 'verify', phone: '6145550123', code: code === '000000' ? '111111' : '000000' } });
+  ok(lBad.status === 400, 'Login: wrong code rejected');
+  const lOk = await call(B, '/api/login', { method: 'POST', json: { action: 'verify', phone: '6145550123', code } });
+  ok(lOk.status === 200 && lOk.body.token === token, 'Login: right code opens the same account');
+  const lReuse = await call(B, '/api/login', { method: 'POST', json: { action: 'verify', phone: '6145550123', code } });
+  ok(lReuse.status === 400, 'Login: a code works only once');
+
+  // Feedback
+  const fbEmpty = await call(B, '/api/feedback', { method: 'POST', json: { t: token } });
+  ok(fbEmpty.status === 400, 'Feedback: empty note rejected');
+  const fbOk = await call(B, '/api/feedback', { method: 'POST', json: { t: token, rating: 4, message: 'Love it. Add a savings goal.', page: 'money' } });
+  ok(fbOk.status === 200, 'Feedback saved from the money page');
+  const fbAnon = await call(B, '/api/feedback', { method: 'POST', json: { rating: 2, page: 'setup' } });
+  ok(fbAnon.status === 200, 'Feedback saved without an account');
+  const adm = await call(B, '/api/admin', { headers: admin });
+  ok(adm.body.feedback.length === 2 && adm.body.feedback.some((f) => f.first_name === 'Sam' && f.rating === 4) && adm.body.stats.avgRating === 3, 'Admin shows feedback with name and average rating', JSON.stringify(adm.body.stats));
 
   const t1 = await call(B, '/api/tx?t=' + token, { method: 'POST', json: { amount: '$5.45', merchant: 'Starbucks', card: 'Apple Card' } });
   ok(t1.status === 200 && String(t1.body).includes('$5.45') && String(t1.body).includes('Starbucks'), 'Shortcut JSON tap logged', t1.body);

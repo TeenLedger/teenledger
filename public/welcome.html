@@ -13,69 +13,109 @@
 <body>
   <nav class="nav"><div class="wrap"><a class="brand" href="/"><img src="/assets/logo.svg" alt="">TeenLedger</a><a class="btn btn-ghost btn-sm hidden" id="nav-page" href="#">My money page</a></div></nav>
 
-  <main class="narrow">
-    <div id="loading" class="app-head"><h1>One second...</h1><p class="sub">Confirming your payment with Stripe.</p></div>
+  <main class="narrow" style="padding-bottom:90px">
+    <div id="loading" class="app-head"><h1>One second...</h1><p class="sub">Confirming your signup.</p></div>
     <div id="fail" class="app-head hidden"><h1>Hmm.</h1><p class="sub" id="fail-msg"></p><button class="btn btn-primary mt-2" onclick="location.reload()">Try again</button></div>
 
     <div id="ready" class="hidden">
       <div class="app-head">
         <span class="pill"><span class="dot"></span><span id="mode-pill">You're in</span></span>
-        <h1>Welcome, <span id="name"></span>!</h1>
-        <p class="sub">Tap the 3 buttons below in order. Takes about a minute.</p>
+        <h1>Hi <span id="name"></span>!</h1>
+        <p class="sub" style="font-size:17px">4 quick steps so your Apple Pay buys log by themselves. About 1 minute.</p>
+        <span class="status-chip wait mt-1" id="chip"><span class="pulse"></span>Not connected yet</span>
       </div>
 
-      <div class="card mt-1">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-          <h3 class="mt-0" style="margin:0">Setup status</h3>
-          <span class="status-chip wait" id="chip"><span class="pulse"></span>Waiting for your iPhone</span>
+      <!-- Done -->
+      <div class="step done hidden" id="all-done">
+        <div class="step-top"><span class="step-n">&#10003;</span><h3>You're all set</h3></div>
+        <p class="do">We just texted you a sample of your Sunday report. Save our number so you know it's us.</p>
+        <a class="btn btn-primary btn-block" href="/api/vcard">Save TeenLedger to contacts</a>
+        <a class="btn btn-dark btn-block" id="page-btn" href="#">Open my money page</a>
+      </div>
+
+      <div id="steps">
+        <!-- 1 -->
+        <div class="step" id="s1">
+          <div class="step-top"><span class="step-n">1</span><h3>Copy your link</h3></div>
+          <div class="linkbox" id="ingest"></div>
+          <button class="btn btn-primary btn-block" id="copy" type="button">Copy my link</button>
+        </div>
+
+        <!-- 2 -->
+        <div class="step" id="s2">
+          <div class="step-top"><span class="step-n">2</span><h3>Get the Shortcut</h3></div>
+          <p class="do">Tap the button. Then tap the box, tap <b>Paste</b>, tap <b>Add Shortcut</b>. Come back here.</p>
+          <a class="btn btn-primary btn-block" id="shortcut-btn" href="#">Get the Shortcut</a>
+          <div class="pic" aria-hidden="true">
+            <svg viewBox="0 0 320 250" font-family="-apple-system, Inter, sans-serif">
+              <text x="160" y="34" fill="#fff" font-size="17" font-weight="700" text-anchor="middle">Configure This Shortcut</text>
+              <text x="160" y="62" fill="#d1d5db" font-size="12" text-anchor="middle">Paste your TeenLedger link</text>
+              <rect x="14" y="76" width="292" height="38" rx="8" fill="#2c2c2e" stroke="#12b886" stroke-width="2.5"/>
+              <text x="28" y="100" fill="#fff" font-size="13">URL</text>
+              <circle cx="290" cy="76" r="11" fill="#12b886"/><text x="290" y="80.5" fill="#fff" font-size="12" font-weight="800" text-anchor="middle">1</text>
+              <rect x="40" y="124" width="74" height="30" rx="8" fill="#3a3a3c" stroke="#12b886" stroke-width="2.5"/>
+              <text x="77" y="144" fill="#fff" font-size="13" font-weight="600" text-anchor="middle">Paste</text>
+              <circle cx="114" cy="124" r="11" fill="#12b886"/><text x="114" y="128.5" fill="#fff" font-size="12" font-weight="800" text-anchor="middle">2</text>
+              <rect x="30" y="190" width="260" height="40" rx="20" fill="#0a84ff" stroke="#12b886" stroke-width="2.5"/>
+              <text x="160" y="215" fill="#fff" font-size="15" font-weight="700" text-anchor="middle">Add Shortcut</text>
+              <circle cx="290" cy="190" r="11" fill="#12b886"/><text x="290" y="194.5" fill="#fff" font-size="12" font-weight="800" text-anchor="middle">3</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- 3 -->
+        <div class="step" id="s3">
+          <div class="step-top"><span class="step-n">3</span><h3>Turn on auto logging</h3></div>
+          <p class="do">Tap the button. Then tap the blue arrow, turn <b>Automation</b> on, tap back. Come back here.</p>
+          <a class="btn btn-primary btn-block" id="open-btn" href="shortcuts://open-shortcut?name=TeenLedger%20Auto">Open the Shortcut</a>
+          <div class="pic" aria-hidden="true">
+            <svg viewBox="0 0 320 262" font-family="-apple-system, Inter, sans-serif">
+              <circle cx="30" cy="28" r="16" fill="#2c2c2e" stroke="#12b886" stroke-width="2.5"/>
+              <path d="M33 20 L25 28 L33 36" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <circle cx="46" cy="14" r="11" fill="#12b886"/><text x="46" y="18.5" fill="#fff" font-size="12" font-weight="800" text-anchor="middle">3</text>
+              <text x="175" y="34" fill="#fff" font-size="15" font-weight="700" text-anchor="middle">TeenLedger Auto</text>
+              <rect x="10" y="58" width="300" height="48" rx="12" fill="#1c1c1e"/>
+              <text x="24" y="88" fill="#fff" font-size="15">When <tspan fill="#0a84ff">Any Card</tspan> is tapped</text>
+              <circle cx="266" cy="82" r="13" fill="none" stroke="#0a84ff" stroke-width="2"/>
+              <path d="M262 76 L268 82 L262 88" stroke="#0a84ff" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+              <circle cx="266" cy="82" r="19" fill="none" stroke="#12b886" stroke-width="2.5"/>
+              <circle cx="286" cy="62" r="11" fill="#12b886"/><text x="286" y="66.5" fill="#fff" font-size="12" font-weight="800" text-anchor="middle">1</text>
+              <text x="160" y="132" fill="#9ca3af" font-size="12" text-anchor="middle">then</text>
+              <rect x="10" y="144" width="300" height="104" rx="12" fill="#1c1c1e"/>
+              <text x="24" y="172" fill="#9ca3af" font-size="13">Merchants</text><text x="296" y="172" fill="#0a84ff" font-size="13" text-anchor="end">Any Merchant</text>
+              <line x1="24" y1="186" x2="296" y2="186" stroke="#2c2c2e"/>
+              <text x="24" y="214" fill="#fff" font-size="15" font-weight="600">Automation</text>
+              <rect x="238" y="196" width="56" height="30" rx="15" fill="#34c759" stroke="#12b886" stroke-width="2.5"/>
+              <circle cx="278" cy="211" r="12" fill="#fff"/>
+              <circle cx="296" cy="196" r="11" fill="#12b886"/><text x="296" y="200.5" fill="#fff" font-size="12" font-weight="800" text-anchor="middle">2</text>
+              <text x="24" y="240" fill="#9ca3af" font-size="12">Leave Notify off</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- 4 -->
+        <div class="step" id="s4">
+          <div class="step-top"><span class="step-n">4</span><h3>Finish setup</h3></div>
+          <p class="do">Tap the button. It connects your phone, brings you back here, and texts you.</p>
+          <a class="btn btn-dark btn-block" id="finish-btn" href="#">Finish setup</a>
+        </div>
+
+        <!-- No shared Shortcut yet: manual fallback -->
+        <div class="step hidden" id="manual">
+          <div class="step-top"><span class="step-n">2</span><h3>Turn on auto logging</h3></div>
+          <p class="do">Open the Shortcuts app and do this once:</p>
+          <ol class="small mt-1" style="padding-left:18px;color:var(--ink-2);font-size:14px">
+            <li>Tap <b>Automation</b>, then <b>+</b>, then <b>Wallet</b>.</li>
+            <li>Select all cards, choose <b>Run Immediately</b>, tap <b>Next</b>.</li>
+            <li>Tap <b>New Blank Automation</b>, then <b>Add Action</b>, then <b>Get Contents of URL</b>.</li>
+            <li>Tap <b>URL</b> and paste your link. Set Method to <b>POST</b>, Request Body to <b>JSON</b>.</li>
+            <li>Add field <b>amount</b> = Shortcut Input, Amount. Add field <b>merchant</b> = Shortcut Input, Merchant. Tap <b>Done</b>.</li>
+            <li>Tap the play button to connect.</li>
+          </ol>
         </div>
       </div>
 
-      <div class="card mt-2">
-        <ol class="steps">
-          <li id="step-shortcut">
-            <b>Add the TeenLedger Shortcut</b>
-            <span>Tap the button, then <b style="display:inline">Set Up Shortcut</b>. Press and hold the box, tap <b style="display:inline">Paste</b>, then <b style="display:inline">Add Shortcut</b>. Come back here.</span>
-            <div class="mt-1"><a class="btn btn-primary btn-block" id="shortcut-btn" href="#">1. Add Shortcut</a></div>
-          </li>
-
-          <li id="step-auto">
-            <b>Turn on auto logging</b>
-            <span>Tap the button. It opens the Shortcut. Tap the blue <b style="display:inline">&gt;</b> next to "is tapped", turn <b style="display:inline">Automation</b> on, then tap back. Come back here.</span>
-            <div class="mt-1"><a class="btn btn-primary btn-block" href="shortcuts://open-shortcut?name=TeenLedger%20Auto">2. Turn on auto logging</a></div>
-          </li>
-
-          <li id="step-manual" class="hidden">
-            <b>Turn on auto logging</b>
-            <span>Copy your private link, open the <b style="display:inline">Shortcuts</b> app and follow these steps once:</span>
-            <div class="copybox"><code id="ingest"></code><button class="btn btn-dark btn-sm" id="copy" type="button">Copy</button></div>
-            <ol class="small mt-1" style="padding-left:18px;color:var(--ink-2);font-size:14px">
-              <li>Tap <b style="display:inline">Automation</b>, then <b style="display:inline">+</b>. Tap <b style="display:inline">Wallet</b> ("When I tap a Wallet Card or Pass").</li>
-              <li>Select all your cards, choose <b style="display:inline">Run Immediately</b>, tap <b style="display:inline">Next</b>.</li>
-              <li>Tap <b style="display:inline">New Blank Automation</b>, then <b style="display:inline">Add Action</b>.</li>
-              <li>Search <b style="display:inline">Get Contents of URL</b> and tap it.</li>
-              <li>Tap the blue <b style="display:inline">URL</b> and paste your link.</li>
-              <li>Tap the arrow to show more. Set Method to <b style="display:inline">POST</b> and Request Body to <b style="display:inline">JSON</b>.</li>
-              <li>Add a Text field. Key: <b style="display:inline">amount</b>. Value: <b style="display:inline">Shortcut Input</b>, then <b style="display:inline">Amount</b>.</li>
-              <li>Add a Text field. Key: <b style="display:inline">merchant</b>. Value: <b style="display:inline">Shortcut Input</b>, then <b style="display:inline">Merchant</b>.</li>
-              <li>Tap <b style="display:inline">Done</b>.</li>
-            </ol>
-          </li>
-
-          <li id="step-test">
-            <b>Finish setup</b>
-            <span id="test-text">Tap the button. It connects your phone and brings you back here. The status at the top turns green.</span>
-            <div class="mt-1" id="test-wrap"><a class="btn btn-dark btn-block" id="test-btn" href="#">3. Finish setup</a></div>
-          </li>
-        </ol>
-      </div>
-
-      <div class="card mt-2" id="done-card">
-        <h3>Your money page</h3>
-        <p>See your week by day and category, add cash buys, and change your budget. Tip: open it in Safari, tap Share, then <b>Add to Home Screen</b>.</p>
-        <a class="btn btn-dark mt-2" id="page-btn" href="#">Open my money page</a>
-      </div>
-      <p class="small center mt-2">Need help? Text HELP to TeenLedger or email <a href="mailto:support@teenledger.app">support@teenledger.app</a>.</p>
+      <p class="small center mt-2">Stuck? Tap Feedback and tell us, or email <a href="mailto:support@teenledger.app">support@teenledger.app</a>.</p>
     </div>
   </main>
 
@@ -87,13 +127,23 @@
   var tries = 0, token = null;
 
   function fail(msg) { $('loading').classList.add('hidden'); $('fail').classList.remove('hidden'); $('fail-msg').textContent = msg; }
+  function key() { return 'tl_steps_' + token; }
+  function doneSteps() { try { return JSON.parse(localStorage.getItem(key()) || '{}'); } catch (e) { return {}; } }
+  function markDone(n) { var d = doneSteps(); d[n] = 1; try { localStorage.setItem(key(), JSON.stringify(d)); } catch (e) {} paint(); }
+  function paint() {
+    var d = doneSteps();
+    ['s1', 's2', 's3'].forEach(function (id, i) {
+      var el = $(id); el.classList.toggle('done', !!d[i + 1]);
+      el.querySelector('.step-n').innerHTML = d[i + 1] ? '&#10003;' : String(i + 1);
+    });
+  }
 
   function confirm() {
     var url = sessionId ? '/api/confirm?session_id=' + encodeURIComponent(sessionId) : '/api/confirm?t=' + encodeURIComponent(t || '');
     fetch(url).then(function (r) { return r.json().then(function (j) { return { s: r.status, j: j }; }); }).then(function (x) {
       if (x.s === 402 && tries++ < 8) return setTimeout(confirm, 2000);
       if (x.s !== 200) return fail(x.j.error || 'We could not confirm your signup.');
-      token = x.j.token;
+      token = x.j.token; window.TL_TOKEN = token;
       try { localStorage.setItem('tl_token', token); } catch (e) {}
       if (sessionId) history.replaceState(null, '', '/welcome?t=' + token);
       $('name').textContent = x.j.firstName;
@@ -108,53 +158,44 @@
       $('ingest').textContent = d.ingestUrl;
       var page = '/u/' + token;
       $('page-btn').href = page; $('nav-page').href = page; $('nav-page').classList.remove('hidden');
-      if (d.shortcutUrl) { $('shortcut-btn').href = d.shortcutUrl; }
-      else {
-        $('step-shortcut').classList.add('hidden'); $('step-auto').classList.add('hidden'); $('step-manual').classList.remove('hidden');
-        $('test-wrap').classList.add('hidden');
-        $('test-text').textContent = 'In the automation, tap the play button at the bottom to connect, or pay for anything with Apple Pay. The status above turns green when it works.';
-      }
-      // Runs the TeenLedger Shortcut once with no purchase (a connection test), then returns to this page.
-      $('test-btn').href = 'shortcuts://x-callback-url/run-shortcut?name=' + encodeURIComponent('TeenLedger Auto') + '&x-success=' + encodeURIComponent(location.origin + '/welcome?t=' + token);
-      setChip(d.connected);
+      if (d.shortcutUrl) $('shortcut-btn').href = d.shortcutUrl;
+      else { ['s2', 's3', 's4'].forEach(function (id) { $(id).classList.add('hidden'); }); $('manual').classList.remove('hidden'); }
+      // Runs the Shortcut once with no purchase. That connects the account, then returns to this page.
+      $('finish-btn').href = 'shortcuts://x-callback-url/run-shortcut?name=' + encodeURIComponent('TeenLedger Auto') + '&x-success=' + encodeURIComponent(location.origin + '/welcome?t=' + token);
+      paint();
+      setConnected(d.connected);
       if (!d.connected) poll();
     });
   }
 
-  function setChip(ok) {
-    var c = $('chip');
-    if (ok) { c.className = 'status-chip ok'; c.innerHTML = '&#10003; Connected. You are all set!'; $('test-text').textContent = 'You are all set. Every Apple Pay tap now logs by itself.'; $('test-wrap').classList.add('hidden'); }
+  function setConnected(ok) {
+    if (!ok) return;
+    var c = $('chip'); c.className = 'status-chip ok mt-1'; c.innerHTML = '&#10003; Connected';
+    $('steps').classList.add('hidden'); $('all-done').classList.remove('hidden');
   }
 
   function poll() {
     setTimeout(function () {
       fetch('/api/me?t=' + encodeURIComponent(token)).then(function (r) { return r.json(); }).then(function (d) {
-        if (d.connected) setChip(true); else poll();
+        if (d.connected) setConnected(true); else poll();
       }).catch(poll);
     }, 3000);
   }
 
-  // One tap: copy the private link, then open the TeenLedger Shortcut so it can be pasted when iOS asks.
-  $('shortcut-btn').addEventListener('click', function (e) {
-    var href = $('shortcut-btn').getAttribute('href');
-    if (!href || href === '#') return;
-    e.preventDefault();
-    var v = $('ingest').textContent;
-    var go = function () { location.href = href; };
-    (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject()).then(go, go);
-  });
-
   $('copy').addEventListener('click', function () {
-    var v = $('ingest').textContent;
-    (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject()).then(function () {
-      $('copy').textContent = 'Copied!'; setTimeout(function () { $('copy').textContent = 'Copy'; }, 1800);
-    }).catch(function () { prompt('Copy your link:', v); });
+    var v = $('ingest').textContent, b = $('copy');
+    var ok = function () { b.textContent = '✓ Copied'; markDone(1); setTimeout(function () { b.textContent = 'Copy my link'; }, 2500); };
+    if (navigator.clipboard) navigator.clipboard.writeText(v).then(ok, function () { prompt('Copy your link:', v); ok(); });
+    else { prompt('Copy your link:', v); ok(); }
   });
+  $('shortcut-btn').addEventListener('click', function () { markDone(2); });
+  $('open-btn').addEventListener('click', function () { markDone(3); });
 
   if (!sessionId && !t) { try { t = localStorage.getItem('tl_token'); } catch (e) {} }
   if (!sessionId && !t) return fail('This page opens after you sign up. Start at teenledger.app.');
   confirm();
 })();
 </script>
+<script src="/assets/feedback.js" data-page="setup"></script>
 </body>
 </html>

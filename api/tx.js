@@ -1,6 +1,6 @@
 import { q } from '../lib/db.js';
 import { text, getQuery, readBody, parseAmount, clean, money, baseUrl } from '../lib/util.js';
-import { byToken, addTransaction } from '../lib/customers.js';
+import { byToken, addTransaction, markConnected } from '../lib/customers.js';
 
 // The iPhone Shortcut posts each Apple Pay tap here. Accepts JSON, form data, query params or plain text.
 export default async function handler(req, res) {
@@ -34,7 +34,7 @@ export default async function handler(req, res) {
 
   // A run with no amount is the connection test from the setup page.
   if (amount === null) {
-    await q('update tl_customers set connected_at = coalesce(connected_at, now()) where id = $1', [c.id]);
+    await markConnected(c, baseUrl(req));
     return text(res, 200, `TeenLedger is connected, ${c.first_name}! Your Apple Pay taps will now log automatically.`);
   }
   if (amount <= 0 || amount > 5000) return text(res, 400, 'TeenLedger: that amount looks wrong, so it was not logged.');
