@@ -41,7 +41,7 @@
 
           <li id="step-shortcut">
             <b>Add the TeenLedger Shortcut</b>
-            <span>Tap the button, then tap <b style="display:inline">Add Shortcut</b>. When it asks for your link, paste it.</span>
+            <span>Tap the button. Your link is copied for you. When iPhone asks for your link, press and hold, tap <b style="display:inline">Paste</b>, then tap <b style="display:inline">Add Shortcut</b>.</span>
             <div class="mt-1"><a class="btn btn-primary" id="shortcut-btn" href="#" target="_blank" rel="noopener">Add TeenLedger Shortcut</a></div>
           </li>
 
@@ -133,6 +133,16 @@
       }).catch(poll);
     }, 3000);
   }
+
+  // One tap: copy the private link, then open the TeenLedger Shortcut so it can be pasted when iOS asks.
+  $('shortcut-btn').addEventListener('click', function (e) {
+    var href = $('shortcut-btn').getAttribute('href');
+    if (!href || href === '#') return;
+    e.preventDefault();
+    var v = $('ingest').textContent;
+    var go = function () { location.href = href; };
+    (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject()).then(go, go);
+  });
 
   $('copy').addEventListener('click', function () {
     var v = $('ingest').textContent;
