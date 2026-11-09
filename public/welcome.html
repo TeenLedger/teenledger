@@ -63,9 +63,9 @@
           </li>
 
           <li id="step-test">
-            <b>Test it</b>
-            <span id="test-text">Tap the button. It runs the Shortcut once and brings you back here. The status at the top turns green.</span>
-            <div class="mt-1" id="test-wrap"><a class="btn btn-dark btn-block" id="test-btn" href="#">3. Test it</a></div>
+            <b>Finish setup</b>
+            <span id="test-text">Tap the button. It connects your phone and brings you back here. The status at the top turns green.</span>
+            <div class="mt-1" id="test-wrap"><a class="btn btn-dark btn-block" id="test-btn" href="#">3. Finish setup</a></div>
           </li>
         </ol>
       </div>
@@ -112,7 +112,7 @@
       else {
         $('step-shortcut').classList.add('hidden'); $('step-auto').classList.add('hidden'); $('step-manual').classList.remove('hidden');
         $('test-wrap').classList.add('hidden');
-        $('test-text').textContent = 'In the automation, tap the play button at the bottom to send a test, or pay for anything with Apple Pay. The status above turns green when it works.';
+        $('test-text').textContent = 'In the automation, tap the play button at the bottom to connect, or pay for anything with Apple Pay. The status above turns green when it works.';
       }
       // Runs the TeenLedger Shortcut once with no purchase (a connection test), then returns to this page.
       $('test-btn').href = 'shortcuts://x-callback-url/run-shortcut?name=' + encodeURIComponent('TeenLedger Auto') + '&x-success=' + encodeURIComponent(location.origin + '/welcome?t=' + token);
@@ -123,7 +123,7 @@
 
   function setChip(ok) {
     var c = $('chip');
-    if (ok) { c.className = 'status-chip ok'; c.innerHTML = '&#10003; Connected. You are all set!'; $('test-text').textContent = 'Done. Every Apple Pay tap now logs by itself.'; $('test-wrap').classList.add('hidden'); }
+    if (ok) { c.className = 'status-chip ok'; c.innerHTML = '&#10003; Connected. You are all set!'; $('test-text').textContent = 'You are all set. Every Apple Pay tap now logs by itself.'; $('test-wrap').classList.add('hidden'); }
   }
 
   function poll() {
