@@ -1,7 +1,7 @@
 import { q, one } from '../lib/db.js';
 import { json, getQuery, readBody, safeEqual, maskPhone, clean, baseUrl, normalizePhone } from '../lib/util.js';
 import { sendWeeklyReport, notify } from '../lib/customers.js';
-import { stripeMode, PLANS } from '../lib/stripe.js';
+import { stripeMode, PLANS, TRIAL_DAYS } from '../lib/stripe.js';
 import { twilioConfigured, sendSms } from '../lib/twilio.js';
 
 const REP_PAY_PER_CUSTOMER = 1; // dollars per active customer per month, from the team agreement
@@ -71,13 +71,17 @@ export default async function handler(req, res) {
     from tl_messages m left join tl_customers c on c.id = m.customer_id order by m.id desc limit 40`);
 
   const active = customers.filter((c) => c.status === 'active');
-  const paying = active.filter((c) => !c.test);
+  const signedUp = active.filter((c) => !c.test);
+  const inTrial = (c) => c.activated_at && Date.now() - new Date(c.activated_at).getTime() < TRIAL_DAYS * 864e5;
+  const trialing = signedUp.filter(inTrial);
+  const paying = signedUp.filter((c) => !inTrial(c));
   const mrr = paying.reduce((s, c) => s + (c.plan === 'yearly' ? PLANS.yearly.price / 12 : PLANS.monthly.price), 0);
   const repRows = reps.map((r) => {
     const mine = paying.filter((c) => c.ref_code === r.code);
-    return { ...r, link: `${siteUrl}/?ref=${r.code}`, activeCustomers: mine.length, monthlyEarnings: mine.length * REP_PAY_PER_CUSTOMER };
+    const trial = trialing.filter((c) => c.ref_code === r.code).length;
+    return { ...r, link: `${siteUrl}/?ref=${r.code}`, activeCustomers: mine.length, trialCustomers: trial, monthlyEarnings: mine.length * REP_PAY_PER_CUSTOMER };
   });
-  const unassigned = paying.filter((c) => !c.ref_code || !reps.some((r) => r.code === c.ref_code)).length;
+  const unassigned = signedUp.filter((c) => !c.ref_code || !reps.some((r) => r.code === c.ref_code)).length;
 
   return json(res, 200, {
     config: { payments: stripeMode(), texting: twilioConfigured() ? 'connected' : 'preview only', cron: Boolean(process.env.CRON_SECRET), shortcutLink: Boolean(process.env.SHORTCUT_URL) },
@@ -85,7 +89,8 @@ export default async function handler(req, res) {
       signups: customers.length,
       active: active.length,
       paying: paying.length,
-      test: active.length - paying.length,
+      trialing: trialing.length,
+      test: active.length - signedUp.length,
       canceled: customers.filter((c) => c.status === 'canceled').length,
       connected: active.filter((c) => c.connected_at).length,
       mrr: Math.round(mrr * 100) / 100,

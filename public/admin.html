@@ -24,6 +24,7 @@
       <div class="app-head"><h1>Business dashboard</h1><p class="sub mt-0" id="cfg"></p></div>
       <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
         <div class="stat"><div class="k">Paying customers</div><div class="v" id="st-paying">0</div></div>
+        <div class="stat"><div class="k">In free trial</div><div class="v" id="st-trial">0</div></div>
         <div class="stat"><div class="k">Monthly revenue</div><div class="v" id="st-mrr">$0</div></div>
         <div class="stat"><div class="k">Auto logging on</div><div class="v" id="st-conn">0</div></div>
         <div class="stat"><div class="k">Total signups</div><div class="v" id="st-signups">0</div></div>
@@ -52,7 +53,7 @@
           <div class="field" style="margin:0"><label>Territory</label><input id="r-terr" type="text" placeholder="10th grade"></div>
           <button class="btn btn-primary" type="submit">Add</button>
         </form>
-        <div class="scroll-x mt-2"><table><thead><tr><th>Rep</th><th>Territory</th><th>Link</th><th>Paying customers</th><th>Earns / mo</th><th></th></tr></thead><tbody id="reps"></tbody></table></div>
+        <div class="scroll-x mt-2"><table><thead><tr><th>Rep</th><th>Territory</th><th>Link</th><th>Paying (trial)</th><th>Earns / mo</th><th></th></tr></thead><tbody id="reps"></tbody></table></div>
       </div>
 
       <div class="card mt-2">
@@ -102,6 +103,7 @@
     $('login').classList.add('hidden'); $('dash').classList.remove('hidden'); $('logout').classList.remove('hidden');
     $('cfg').textContent = 'Payments: ' + d.config.payments + '  |  Texting: ' + d.config.texting + '  |  Sunday cron: ' + (d.config.cron ? 'on' : 'off') + '  |  Shared Shortcut link: ' + (d.config.shortcutLink ? 'set' : 'not set');
     $('st-paying').textContent = d.stats.paying + (d.stats.test ? ' (+' + d.stats.test + ' test)' : '');
+    $('st-trial').textContent = d.stats.trialing;
     $('st-mrr').textContent = money(d.stats.mrr);
     $('st-conn').textContent = d.stats.connected + ' / ' + d.stats.active;
     $('st-signups').textContent = d.stats.signups;
@@ -113,7 +115,7 @@
       var tr = el('tr');
       tr.appendChild(el('td', r.name)); tr.appendChild(el('td', r.territory || ''));
       var td = el('td'); var a = el('a', r.link.replace(/^https?:\/\//, '')); a.href = r.link; a.target = '_blank'; td.appendChild(a); tr.appendChild(td);
-      tr.appendChild(el('td', r.activeCustomers)); tr.appendChild(el('td', money(r.monthlyEarnings)));
+      tr.appendChild(el('td', r.activeCustomers + (r.trialCustomers ? ' (' + r.trialCustomers + ')' : ''))); tr.appendChild(el('td', money(r.monthlyEarnings)));
       var rm = el('td'); var b = el('button', 'Remove', 'btn btn-ghost btn-sm'); b.onclick = function () { if (confirm('Remove ' + r.name + '?')) api({ action: 'remove_rep', code: r.code }).then(load); }; rm.appendChild(b); tr.appendChild(rm);
       reps.appendChild(tr);
     });

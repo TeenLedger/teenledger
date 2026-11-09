@@ -25,7 +25,7 @@ export async function start({ port = 0, live = true } = {}) {
       if (p === '/__mock/checkout') {
         const s = mock.sessions.get(u.searchParams.get('session'));
         s.status = 'complete';
-        s.payment_status = 'paid';
+        s.payment_status = 'no_payment_required';
         s.customer = 'cus_mock_' + s.client_reference_id;
         s.subscription = 'sub_mock_' + s.client_reference_id;
         mock.subs.set(s.subscription, { id: s.subscription, status: 'active' });
@@ -93,7 +93,7 @@ async function mockStripe(req, res, p, mock, base) {
   if (req.method === 'POST' && p === '/checkout/sessions') {
     if (body['line_items[0][price_data][unit_amount]'] !== '300' && body['line_items[0][price_data][unit_amount]'] !== '3000') return send(400, { error: { message: 'bad amount' } });
     const id = 'cs_test_' + (mock.sessions.size + 1);
-    const s = { id, object: 'checkout.session', url: `${base}/__mock/checkout?session=${id}`, status: 'open', payment_status: 'unpaid', client_reference_id: body.client_reference_id, metadata: { tl_customer: body['metadata[tl_customer]'] }, success_url: body.success_url, mode: body.mode, amount: body['line_items[0][price_data][unit_amount]'], interval: body['line_items[0][price_data][recurring][interval]'] };
+    const s = { id, object: 'checkout.session', url: `${base}/__mock/checkout?session=${id}`, status: 'open', payment_status: 'unpaid', client_reference_id: body.client_reference_id, metadata: { tl_customer: body['metadata[tl_customer]'] }, success_url: body.success_url, mode: body.mode, amount: body['line_items[0][price_data][unit_amount]'], interval: body['line_items[0][price_data][recurring][interval]'], trialDays: body['subscription_data[trial_period_days]'] };
     mock.sessions.set(id, s);
     return send(200, s);
   }

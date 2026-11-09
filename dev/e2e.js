@@ -55,7 +55,7 @@ async function liveMode() {
   const su = await call(B, '/api/signup', { method: 'POST', json: { firstName: 'Sam', phone: '(614) 555-0123', grade: '11th', weeklyBudget: '50', plan: 'monthly', consent: true, ref: 'maya' } });
   ok(su.status === 200 && su.body.url.includes('/__mock/checkout'), 'Signup opens Stripe Checkout', JSON.stringify(su.body));
   const sess = [...s.mock.sessions.values()][0];
-  ok(sess && sess.mode === 'subscription' && sess.amount === '300' && sess.interval === 'month', 'Checkout is a $3/month subscription');
+  ok(sess && sess.mode === 'subscription' && sess.amount === '300' && sess.interval === 'month' && sess.trialDays === '30', 'Checkout is a $3/month subscription with 30 day free trial');
 
   const early = await call(B, '/api/confirm?session_id=' + sess.id);
   ok(early.status === 402, 'Confirm refuses before payment');
@@ -148,9 +148,9 @@ async function liveMode() {
   const tok2 = conf2.body.token;
 
   const a = await call(B, '/api/admin', { headers: admin });
-  ok(a.body.stats.paying === 2 && a.body.stats.mrr === 5.5, 'Admin shows 2 paying, $5.50 monthly revenue', JSON.stringify(a.body.stats));
+  ok(a.body.stats.trialing === 2 && a.body.stats.paying === 0 && a.body.stats.mrr === 0, 'Admin shows 2 in free trial, $0 revenue yet', JSON.stringify(a.body.stats));
   const repRow = a.body.reps.find((r) => r.code === 'maya');
-  ok(repRow && repRow.activeCustomers === 1 && repRow.monthlyEarnings === 1, 'Rep Maya credited 1 customer, $1/month');
+  ok(repRow && repRow.trialCustomers === 1 && repRow.monthlyEarnings === 0, 'Rep Maya credited 1 trial customer, pay starts after trial');
   ok(a.body.customers.every((c) => /^\(\*\*\*\) \*\*\*-\d{4}$/.test(c.phone)), 'Admin masks phone numbers');
   ok(a.body.messages.length > 0, 'Admin shows text log');
 

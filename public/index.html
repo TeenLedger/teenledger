@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>TeenLedger: know where your money goes, automatically</title>
-  <meta name="description" content="TeenLedger logs every Apple Pay tap for you and texts you a 30 second money check every Sunday with one tip to save more. $3 a month. Set up in 2 minutes.">
+  <meta name="description" content="TeenLedger logs every Apple Pay tap for you and texts you a 30 second money check every Sunday with one tip to save more. Free for 30 days, then $3 a month.">
   <meta name="theme-color" content="#12b886">
   <meta property="og:title" content="TeenLedger: know where your money goes">
-  <meta property="og:description" content="Automatic Apple Pay tracking and a weekly money text for teens. $3 a month.">
+  <meta property="og:description" content="Automatic Apple Pay tracking and a weekly money text for teens. Free for 30 days, then $3 a month.">
   <meta property="og:type" content="website">
   <link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/assets/logo.svg">
@@ -24,7 +24,7 @@
         <a href="#how">How it works</a>
         <a href="#pricing">Pricing</a>
         <a href="#faq">FAQ</a>
-        <a class="btn btn-primary btn-sm" href="#signup">Start for $3</a>
+        <a class="btn btn-primary btn-sm" href="#signup">Try free</a>
       </div>
     </div>
   </nav>
@@ -36,10 +36,11 @@
         <h1>Know where your money goes. <span class="hl">Without tracking a thing.</span></h1>
         <p class="lead">TeenLedger logs every Apple Pay tap for you. Every Sunday you get one short text: what you spent, where it went, and one tip to keep more of it.</p>
         <div class="cta-row">
-          <a class="btn btn-primary" href="#signup">Start for $3 a month</a>
+          <a class="btn btn-primary" href="#signup">Start your free month</a>
           <a class="btn btn-ghost" href="#how">See how it works</a>
         </div>
         <div class="trust">
+          <span><i class="check">&#10003;</i>30 days free</span>
           <span><i class="check">&#10003;</i>No bank login</span>
           <span><i class="check">&#10003;</i>2 minute setup</span>
           <span><i class="check">&#10003;</i>Cancel anytime</span>
@@ -97,8 +98,8 @@ Top: Food &amp; Drinks $24.10, Shopping $14, Games &amp; Fun $8.10.</div>
       <div class="grid-3 mt-3">
         <div class="card">
           <div class="step-num">1</div>
-          <h3>Sign up with Apple Pay</h3>
-          <p>First name, phone number, weekly budget. Pay $3 with Apple Pay or a card.</p>
+          <h3>Start your free month</h3>
+          <p>First name, phone number, weekly budget. Add Apple Pay or a card. Nothing is charged for 30 days.</p>
           <span class="time">30 seconds</span>
         </div>
         <div class="card">
@@ -180,12 +181,13 @@ Top: Food &amp; Drinks $24.10, Shopping $14, Games &amp; Fun $8.10.</div>
   <section id="pricing" style="padding-top:0">
     <div class="wrap center">
       <div class="eyebrow">Pricing</div>
-      <h2>Less than one coffee a month</h2>
-      <p class="sub">One plan with everything. Cancel anytime from your money page.</p>
+      <h2>Free for 30 days. Then less than one coffee a month.</h2>
+      <p class="sub">One plan with everything. Cancel anytime from your money page, and if you cancel in the first 30 days you pay nothing.</p>
       <div class="price-wrap">
         <div class="card price" style="text-align:left">
           <div class="small" style="font-weight:700">Monthly</div>
           <div class="amt">$3<small> / month</small></div>
+          <div class="small" style="font-weight:700;color:var(--mint-2)">after 30 days free</div>
           <ul class="list"><li><i class="check">&#10003;</i>Automatic Apple Pay logging</li><li><i class="check">&#10003;</i>Sunday money text</li><li><i class="check">&#10003;</i>Budget alerts and tips</li></ul>
           <a class="btn btn-dark btn-block mt-2" href="#signup" data-plan="monthly">Choose monthly</a>
         </div>
@@ -193,6 +195,7 @@ Top: Food &amp; Drinks $24.10, Shopping $14, Games &amp; Fun $8.10.</div>
           <span class="tag">Save $6</span>
           <div class="small" style="font-weight:700">Yearly</div>
           <div class="amt">$30<small> / year</small></div>
+          <div class="small" style="font-weight:700;color:var(--mint-2)">after 30 days free</div>
           <ul class="list"><li><i class="check">&#10003;</i>Everything in monthly</li><li><i class="check">&#10003;</i>2 months free</li><li><i class="check">&#10003;</i>One payment, done</li></ul>
           <a class="btn btn-primary btn-block mt-2" href="#signup" data-plan="yearly">Choose yearly</a>
         </div>
@@ -204,8 +207,8 @@ Top: Food &amp; Drinks $24.10, Shopping $14, Games &amp; Fun $8.10.</div>
     <div class="wrap">
       <div class="center">
         <div class="eyebrow">Get started</div>
-        <h2>Start in 30 seconds</h2>
-        <p class="sub">Next you pay with Apple Pay, then we walk you through the 90 second setup.</p>
+        <h2>Start your free month</h2>
+        <p class="sub">30 days free, then $3 a month. Add Apple Pay or a card, then we walk you through the 90 second setup.</p>
       </div>
       <form class="card form-card" id="signup-form" novalidate>
         <div class="notice hidden" id="canceled-note">No problem, you were not charged. You can try again anytime.</div>
@@ -223,13 +226,13 @@ Top: Food &amp; Drinks $24.10, Shopping $14, Games &amp; Fun $8.10.</div>
         <div class="field">
           <label>Plan</label>
           <div class="seg">
-            <input type="radio" name="plan" id="p-m" value="monthly" checked><label for="p-m">$3 / month<small>cancel anytime</small></label>
-            <input type="radio" name="plan" id="p-y" value="yearly"><label for="p-y">$30 / year<small>2 months free</small></label>
+            <input type="radio" name="plan" id="p-m" value="monthly" checked><label for="p-m">$3 / month<small>after 30 free days</small></label>
+            <input type="radio" name="plan" id="p-y" value="yearly"><label for="p-y">$30 / year<small>after 30 free days</small></label>
           </div>
         </div>
         <label class="consent"><input type="checkbox" id="consent" name="consent"><span>I am 13 or older and agree to get texts from TeenLedger about my spending (about 1 to 3 a week). Msg and data rates may apply. Reply STOP to opt out, HELP for help. See the <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</span></label>
-        <button class="btn btn-primary btn-block" id="go" type="submit">Continue to Apple Pay</button>
-        <p class="small center mt-1">Secure checkout by Stripe. Apple Pay, cards, and Google Pay accepted.</p>
+        <button class="btn btn-primary btn-block" id="go" type="submit">Start free trial</button>
+        <p class="small center mt-1">No charge today. Secure checkout by Stripe with Apple Pay, cards, or Google Pay. Cancel anytime in your first 30 days and you pay nothing.</p>
       </form>
     </div>
   </section>
@@ -241,6 +244,7 @@ Top: Food &amp; Drinks $24.10, Shopping $14, Games &amp; Fun $8.10.</div>
       <details><summary>What does setup actually look like?</summary><p>After you pay, your setup page shows two things to tap: add the TeenLedger Shortcut, then turn on a Wallet automation in the Shortcuts app. It takes about 90 seconds and the page tells you the moment it is connected.</p></details>
       <details><summary>What about cash or online purchases?</summary><p>The automation catches in store Apple Pay taps. For cash or anything else, add it on your money page in two taps, or text it to us, like "6 lunch".</p></details>
       <details><summary>Does it work on Android?</summary><p>Not yet. TeenLedger needs an iPhone with Apple Pay set up in Wallet and iOS 17 or newer.</p></details>
+      <details><summary>Is the first month really free?</summary><p>Yes. You add Apple Pay or a card at sign up, but nothing is charged for 30 days. Cancel on your money page before then and you never pay.</p></details>
       <details><summary>Can I cancel?</summary><p>Yes, anytime, in one tap on your money page. You can also delete all of your data there.</p></details>
       <details><summary>Who runs TeenLedger?</summary><p>TeenLedger is a student run business based in Central Ohio. We built it because we had the same "where did my money go" problem.</p></details>
     </div>
@@ -312,7 +316,7 @@ Top: Food &amp; Drinks $24.10, Shopping $14, Games &amp; Fun $8.10.</div>
       })
       .catch(function (e2) {
         err.textContent = e2.message; err.style.display = 'block';
-        btn.disabled = false; btn.textContent = 'Continue to Apple Pay';
+        btn.disabled = false; btn.textContent = 'Start free trial';
       });
   });
 })();
