@@ -55,7 +55,7 @@ async function liveMode() {
   const su = await call(B, '/api/signup', { method: 'POST', json: { firstName: 'Sam', phone: '(614) 555-0123', grade: '11th', weeklyBudget: '50', plan: 'monthly', consent: true, ref: 'maya' } });
   ok(su.status === 200 && su.body.url.includes('/__mock/checkout'), 'Signup opens Stripe Checkout', JSON.stringify(su.body));
   const sess = [...s.mock.sessions.values()][0];
-  ok(sess && sess.mode === 'subscription' && sess.amount === '300' && sess.interval === 'month' && sess.trialDays === '30', 'Checkout is a $3/month subscription with 30 day free trial');
+  ok(sess && sess.mode === 'subscription' && sess.amount === '300' && sess.interval === 'month' && sess.trialDays === '7', 'Checkout is a $3/month subscription with 7 day free trial');
 
   const early = await call(B, '/api/confirm?session_id=' + sess.id);
   ok(early.status === 402, 'Confirm refuses before payment');
